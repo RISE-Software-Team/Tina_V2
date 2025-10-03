@@ -9,6 +9,14 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Utilities/trace/adv_trace/subdir.mk
+-include Utilities/timer/subdir.mk
+-include Utilities/sequencer/subdir.mk
+-include Utilities/misc/subdir.mk
+-include Utilities/lpm/tiny_lpm/subdir.mk
+-include SubGHz_Phy/Target/subdir.mk
+-include SubGHz_Phy/App/subdir.mk
+-include Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/subdir.mk
 -include Drivers/STM32WLxx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk

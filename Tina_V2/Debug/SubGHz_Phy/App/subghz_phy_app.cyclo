@@ -1,0 +1,13 @@
+../SubGHz_Phy/App/subghz_phy_app.c:127:6:SubghzApp_Init	1
+../SubGHz_Phy/App/subghz_phy_app.c:158:16:BuildPacketHeader	1
+../SubGHz_Phy/App/subghz_phy_app.c:181:16:BuildTelemetryPacket	1
+../SubGHz_Phy/App/subghz_phy_app.c:208:6:Radio_SendTelemetry	4
+../SubGHz_Phy/App/subghz_phy_app.c:242:16:CalculateChecksum	2
+../SubGHz_Phy/App/subghz_phy_app.c:254:13:Pack16	1
+../SubGHz_Phy/App/subghz_phy_app.c:260:13:Pack32	1
+../SubGHz_Phy/App/subghz_phy_app.c:271:13:OnTxDone	1
+../SubGHz_Phy/App/subghz_phy_app.c:280:13:OnRxDone	1
+../SubGHz_Phy/App/subghz_phy_app.c:286:13:OnTxTimeout	1
+../SubGHz_Phy/App/subghz_phy_app.c:292:13:OnRxTimeout	1
+../SubGHz_Phy/App/subghz_phy_app.c:298:13:OnRxError	1
+../SubGHz_Phy/App/subghz_phy_app.c:304:13:OnTxLedEvent	1

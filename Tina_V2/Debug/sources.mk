@@ -25,4 +25,12 @@ SUBDIRS := \
 Core/Src \
 Core/Startup \
 Drivers/STM32WLxx_HAL_Driver/Src \
+Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver \
+SubGHz_Phy/App \
+SubGHz_Phy/Target \
+Utilities/lpm/tiny_lpm \
+Utilities/misc \
+Utilities/sequencer \
+Utilities/timer \
+Utilities/trace/adv_trace \
 

@@ -74,6 +74,44 @@ void HAL_MspInit(void)
   /* USER CODE END MspInit 1 */
 }
 
+/**
+* @brief SUBGHZ MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hsubghz: SUBGHZ handle pointer
+* @retval None
+*/
+void HAL_SUBGHZ_MspInit(SUBGHZ_HandleTypeDef* hsubghz)
+{
+  /* USER CODE BEGIN SUBGHZ_MspInit 0 */
+
+  /* USER CODE END SUBGHZ_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_SUBGHZSPI_CLK_ENABLE();
+  /* USER CODE BEGIN SUBGHZ_MspInit 1 */
+
+  /* USER CODE END SUBGHZ_MspInit 1 */
+
+}
+
+/**
+* @brief SUBGHZ MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hsubghz: SUBGHZ handle pointer
+* @retval None
+*/
+void HAL_SUBGHZ_MspDeInit(SUBGHZ_HandleTypeDef* hsubghz)
+{
+  /* USER CODE BEGIN SUBGHZ_MspDeInit 0 */
+
+  /* USER CODE END SUBGHZ_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_SUBGHZSPI_CLK_DISABLE();
+  /* USER CODE BEGIN SUBGHZ_MspDeInit 1 */
+
+  /* USER CODE END SUBGHZ_MspDeInit 1 */
+
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

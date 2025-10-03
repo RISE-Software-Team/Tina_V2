@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "app_subghz_phy.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -40,6 +41,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+SUBGHZ_HandleTypeDef hsubghz;
 
 /* USER CODE BEGIN PV */
 
@@ -86,8 +88,20 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_SubGHz_Phy_Init();
   /* USER CODE BEGIN 2 */
+  printf("Test");
 
+//  // --- Send a test telemetry packet ---
+//  int16_t acc_x = 100, acc_y = -50, acc_z = 1024;
+//  int16_t gyro_x = 10, gyro_y = -20, gyro_z = 5;
+//  uint32_t altitude = 12345;
+//  uint8_t event_flags = 0x01;
+//  uint8_t sys_state = 0x02;
+//
+//  Radio_SendTelemetry(acc_x, acc_y, acc_z,
+//                      gyro_x, gyro_y, gyro_z,
+//                      altitude, event_flags, sys_state);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -95,8 +109,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5); // replace with the correct port/pin
-	  HAL_Delay(500);
+//    MX_SubGHz_Phy_Pr.ocess();
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -142,6 +156,32 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief SUBGHZ Initialization Function
+  * @param None
+  * @retval None
+  */
+void MX_SUBGHZ_Init(void)
+{
+
+  /* USER CODE BEGIN SUBGHZ_Init 0 */
+
+  /* USER CODE END SUBGHZ_Init 0 */
+
+  /* USER CODE BEGIN SUBGHZ_Init 1 */
+
+  /* USER CODE END SUBGHZ_Init 1 */
+  hsubghz.Init.BaudratePrescaler = SUBGHZSPI_BAUDRATEPRESCALER_8;
+  if (HAL_SUBGHZ_Init(&hsubghz) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SUBGHZ_Init 2 */
+
+  /* USER CODE END SUBGHZ_Init 2 */
+
 }
 
 /**
