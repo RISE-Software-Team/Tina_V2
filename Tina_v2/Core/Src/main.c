@@ -21,7 +21,8 @@
 #include "app_subghz_phy.h"
 #include "usart.h"
 #include "gpio.h"
-
+#include "error_handler.h"
+#include "packet.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -90,27 +91,36 @@ int main(void)
   MX_SubGHz_Phy_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  int16_t acc_x = 100, acc_y = -50, acc_z = 1024;
-  int16_t gyro_x = 10, gyro_y = -20, gyro_z = 5;
-  uint32_t altitude = 12345;
-  uint8_t event_flags = 0x01;
-  uint8_t sys_state = 0x02;
+  TelemetryData_t telemetry_test = {
+      .acc_x = 100,
+      .acc_y = -50,
+      .acc_z = 1024,
+      .gyro_x = 10,
+      .gyro_y = -20,
+      .gyro_z = 5,
+      .altitude = 12345,
+      .event_flags = 0x01,
+      .sys_state = 0x02
+  };
+
+  // Example error data
+  ErrorData_t error_test = {
+      .severity = SEV_ERROR,
+      .err_code = ERR_IMU_FAIL
+  };
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  printf("test");
-	  fflush(stdout);
-	  Radio_SendTelemetry(acc_x, acc_y, acc_z,
-	                       gyro_x, gyro_y, gyro_z,
-	                       altitude, event_flags, sys_state);
+	  MX_SubGHz_Phy_Process();
 
-
+	  Radio_SendTelemetry_Packet(&telemetry_test);
+	  Radio_SendError_Packet(&error_test);
 
     /* USER CODE END WHILE */
-    MX_SubGHz_Phy_Process();
+
 
     /* USER CODE BEGIN 3 */
   }

@@ -29,30 +29,12 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
-
+#include "packet.h"
 
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-typedef struct {
-	int16_t acc_x;
-	int16_t acc_y;
-	int16_t acc_z;
-	int16_t gyro_x;
-	int16_t gyro_y;
-	int16_t gyro_z;
-	int32_t altitude;
-	uint8_t event_flags;
-	uint8_t sys_state;
-
-} TelemetryData_t;
-
-typedef enum {
-	  PACKET_TYPE_TELEMETRY = 0x01,
-	  PACKET_TYPE_INFO      = 0x02,
-	  PACKET_TYPE_ERROR     = 0x03
-} PacketType_t;
 
 /* USER CODE END ET */
 
@@ -91,9 +73,7 @@ typedef enum {
 #define PAYLOAD_LEN                                 64
 
 /* USER CODE BEGIN EC */
-#define LED_TX_GPIO_Port GPIOB
-#define LED_TX_Pin GPIO_PIN_5
-#define TX_LED_BLINK_MS 100
+
 
 #define TX_TIMEOUT_VALUE 							3000 //TODO find a suitable time for this
 #define RX_TIMEOUT_VALUE              				3000
@@ -126,6 +106,8 @@ void SubghzApp_Init(void);
 
 /* USER CODE BEGIN EFP */
 void SubghzApp_Process(void);
+void Radio_SendError_Packet(const ErrorData_t *err_packet);
+void Radio_SendTelemetry_Packet(const TelemetryData_t *telemetry);
 
 /* USER CODE END EFP */
 
