@@ -29,10 +29,18 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
-
+#include "stm32wlxx.h"
 
 /* Variables */
-extern int __io_putchar(int ch) __attribute__((weak));
+extern UART_HandleTypeDef huart2;
+
+int __io_putchar(int ch)
+{
+    // Send the character through USART2
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
+//extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
 
 

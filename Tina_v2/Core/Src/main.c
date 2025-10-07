@@ -19,11 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "app_subghz_phy.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,6 +88,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SubGHz_Phy_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   int16_t acc_x = 100, acc_y = -50, acc_z = 1024;
   int16_t gyro_x = 10, gyro_y = -20, gyro_z = 5;
@@ -99,12 +101,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_RESET);
-
+	  printf("test");
+	  fflush(stdout);
 	  Radio_SendTelemetry(acc_x, acc_y, acc_z,
 	                       gyro_x, gyro_y, gyro_z,
 	                       altitude, event_flags, sys_state);
-	  HAL_Delay(2000);
+
+
 
     /* USER CODE END WHILE */
     MX_SubGHz_Phy_Process();

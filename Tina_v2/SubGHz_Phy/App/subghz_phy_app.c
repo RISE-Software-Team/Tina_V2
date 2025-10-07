@@ -246,8 +246,8 @@ void Radio_SendTelemetry(int16_t acc_x, int16_t acc_y, int16_t acc_z,
 
      uint8_t testBuffer[5] = {0xAA, 0x01, 0x02, 0x03, 0x04};
      Radio.Send(testBuffer, 5);
-     printf("sent");
-     fflush(stdout);
+//     printf("sent");
+//     fflush(stdout);
 
 //    if (len > 0)
 //    {
