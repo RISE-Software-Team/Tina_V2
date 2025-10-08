@@ -108,6 +108,7 @@ void SubghzApp_Init(void);
 void SubghzApp_Process(void);
 void Radio_SendError_Packet(const ErrorData_t *err_packet);
 void Radio_SendTelemetry_Packet(const TelemetryData_t *telemetry);
+void Radio_SendInfo_Packet(const InfoData_t *info_packet);
 
 /* USER CODE END EFP */
 

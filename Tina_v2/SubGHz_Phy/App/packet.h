@@ -8,8 +8,8 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+#include <logger.h>
 #include <stdint.h>
-#include "error_handler.h"
 
 typedef enum {
     PACKET_TYPE_TELEMETRY = 0x01,
@@ -30,9 +30,15 @@ typedef struct {
 	ErrorCode_t err_code;
 } ErrorData_t;
 
+typedef struct {
+	InfoCode_t info_code;
+	//potentially add variable length message
+} InfoData_t;
+
 
 uint8_t Packet_BuildTelemetry(uint8_t *buffer, const TelemetryData_t *data);
 uint8_t Packet_BuildError(uint8_t *buffer, const ErrorData_t *data);
+uint8_t Packet_BuildInfo(uint8_t *buffer, const InfoData_t *data);
 uint8_t Packet_CalculateChecksum(const uint8_t *buffer, uint8_t len);
 
 #endif // PACKET_H

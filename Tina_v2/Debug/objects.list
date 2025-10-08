@@ -1,4 +1,4 @@
-"./App_Tina/Utils/error_handler.o"
+"./App_Tina/Utils/logger.o"
 "./Core/Src/adc.o"
 "./Core/Src/dma.o"
 "./Core/Src/gpio.o"

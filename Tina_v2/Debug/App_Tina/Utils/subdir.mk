@@ -5,13 +5,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../App_Tina/Utils/error_handler.c 
+../App_Tina/Utils/logger.c 
 
 OBJS += \
-./App_Tina/Utils/error_handler.o 
+./App_Tina/Utils/logger.o 
 
 C_DEPS += \
-./App_Tina/Utils/error_handler.d 
+./App_Tina/Utils/logger.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +21,7 @@ App_Tina/Utils/%.o App_Tina/Utils/%.su App_Tina/Utils/%.cyclo: ../App_Tina/Utils
 clean: clean-App_Tina-2f-Utils
 
 clean-App_Tina-2f-Utils:
-	-$(RM) ./App_Tina/Utils/error_handler.cyclo ./App_Tina/Utils/error_handler.d ./App_Tina/Utils/error_handler.o ./App_Tina/Utils/error_handler.su
+	-$(RM) ./App_Tina/Utils/logger.cyclo ./App_Tina/Utils/logger.d ./App_Tina/Utils/logger.o ./App_Tina/Utils/logger.su
 
 .PHONY: clean-App_Tina-2f-Utils
 

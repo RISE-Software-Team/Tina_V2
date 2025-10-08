@@ -192,6 +192,7 @@ void Radio_SendTelemetry_Packet(const TelemetryData_t *telemetry)
     }
 
     radio_status_t send_status = Radio.Send(BufferTx, len);
+
     if (send_status != RADIO_STATUS_OK){
         ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "Radio send failed");
     }
@@ -216,12 +217,38 @@ void Radio_SendError_Packet(const ErrorData_t *err_packet)
         return;
     }
 
-    bool success = Radio.Send(BufferTx, len);
-    if (!success) {
-        ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "Radio send failed");
-    }
+    radio_status_t send_status = Radio.Send(BufferTx, len);
+
+       if (send_status != RADIO_STATUS_OK){
+           ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "Radio send failed");
+       }
 }
 
+void Radio_SendInfo_Packet(const InfoData_t *info_packet)
+{
+    if (!info_packet) {
+        ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet pointer NULL");
+        return;
+    }
+
+    uint8_t len = Packet_BuildInfo(BufferTx, info_packet);
+
+    if (len == 0) {
+        ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet build failed");
+        return;
+    }
+
+    if (len > MAX_APP_BUFFER_SIZE) {
+        ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet overflow");
+        return;
+    }
+
+    radio_status_t send_status = Radio.Send(BufferTx, len);
+
+   if (send_status != RADIO_STATUS_OK){
+	   ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "Radio send failed");
+   }
+}
 
 /* USER CODE END EF */
 

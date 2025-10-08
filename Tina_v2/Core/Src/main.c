@@ -17,11 +17,11 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <logger.h>
 #include "main.h"
 #include "app_subghz_phy.h"
 #include "usart.h"
 #include "gpio.h"
-#include "error_handler.h"
 #include "packet.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

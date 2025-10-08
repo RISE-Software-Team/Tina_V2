@@ -1,9 +1,10 @@
 ../SubGHz_Phy/App/subghz_phy_app.c:116:6:SubghzApp_Init	1
 ../SubGHz_Phy/App/subghz_phy_app.c:167:6:SubghzApp_Process	1
 ../SubGHz_Phy/App/subghz_phy_app.c:175:6:Radio_SendTelemetry_Packet	5
-../SubGHz_Phy/App/subghz_phy_app.c:200:6:Radio_SendError_Packet	5
-../SubGHz_Phy/App/subghz_phy_app.c:229:13:OnTxDone	1
-../SubGHz_Phy/App/subghz_phy_app.c:236:13:OnRxDone	1
-../SubGHz_Phy/App/subghz_phy_app.c:242:13:OnTxTimeout	1
-../SubGHz_Phy/App/subghz_phy_app.c:248:13:OnRxTimeout	1
-../SubGHz_Phy/App/subghz_phy_app.c:254:13:OnRxError	1
+../SubGHz_Phy/App/subghz_phy_app.c:201:6:Radio_SendError_Packet	5
+../SubGHz_Phy/App/subghz_phy_app.c:227:6:Radio_SendInfo_Packet	5
+../SubGHz_Phy/App/subghz_phy_app.c:256:13:OnTxDone	1
+../SubGHz_Phy/App/subghz_phy_app.c:263:13:OnRxDone	1
+../SubGHz_Phy/App/subghz_phy_app.c:269:13:OnTxTimeout	1
+../SubGHz_Phy/App/subghz_phy_app.c:275:13:OnRxTimeout	1
+../SubGHz_Phy/App/subghz_phy_app.c:281:13:OnRxError	1

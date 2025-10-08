@@ -4,3 +4,4 @@
 ../SubGHz_Phy/App/packet.c:35:9:Packet_BuildHeader	24	static
 ../SubGHz_Phy/App/packet.c:49:9:Packet_BuildTelemetry	24	static
 ../SubGHz_Phy/App/packet.c:71:9:Packet_BuildError	24	static
+../SubGHz_Phy/App/packet.c:86:9:Packet_BuildInfo	24	static

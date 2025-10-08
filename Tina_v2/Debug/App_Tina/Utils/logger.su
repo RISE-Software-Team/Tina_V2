@@ -1,0 +1,4 @@
+../App_Tina/Utils/logger.c:12:13:Radio_SendInfo	24	static
+../App_Tina/Utils/logger.c:22:13:Radio_SendError	24	static
+../App_Tina/Utils/logger.c:37:13:Log_Error	24	static
+../App_Tina/Utils/logger.c:47:6:ErrorHandler_Report	16	static

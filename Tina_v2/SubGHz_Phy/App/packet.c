@@ -83,3 +83,17 @@ uint8_t Packet_BuildError(uint8_t *buffer, const ErrorData_t *data) {
     return idx;
 }
 
+uint8_t Packet_BuildInfo(uint8_t *buffer, const InfoData_t *data) {
+
+	uint8_t idx = Packet_BuildHeader(buffer);
+
+    buffer[idx++] = PACKET_TYPE_INFO;
+
+    buffer[idx++] = data->info_code;
+
+    uint8_t crc = Packet_CalculateChecksum(buffer, idx);
+    buffer[idx++] = crc;
+    buffer[3] = idx;
+
+    return idx;
+}
