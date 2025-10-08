@@ -493,7 +493,7 @@ BME280_BUS_RD_PARAM_TYPE to function calls used inside the API
 /**\name	I2C ADDRESS DEFINITIONS  */
 /***************************************************/
 #define BME280_I2C_ADDRESS1                  (0x76)
-#define BME280_I2C_ADDRESS2                  (0x77)
+#define BME280_I2C_ADDRESS2                  (0x28)
 /****************************************************/
 /**\name	POWER MODE DEFINITIONS  */
 /***************************************************/

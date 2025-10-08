@@ -60,8 +60,8 @@ all: main-build
 main-build: Tina_sensor_tests.elf secondary-outputs
 
 # Tool invocations
-Tina_sensor_tests.elf Tina_sensor_tests.map: $(OBJS) $(USER_OBJS) /home/krissal1234/Documents/projects/rise/tina_sensor_tests/STM32WLE5JCIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Tina_sensor_tests.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/krissal1234/Documents/projects/rise/tina_sensor_tests/STM32WLE5JCIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tina_sensor_tests.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Tina_sensor_tests.elf Tina_sensor_tests.map: $(OBJS) $(USER_OBJS) /home/krissal1234/Documents/projects/rise/Tina_V2/tina_sensor_tests/STM32WLE5JCIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Tina_sensor_tests.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/krissal1234/Documents/projects/rise/Tina_V2/tina_sensor_tests/STM32WLE5JCIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tina_sensor_tests.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -1,5 +1,5 @@
 "./Core/Src/bme280.o"
-"./Core/Src/bme280_support.o"
+"./Core/Src/bme280_support2.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32wlxx_hal_msp.o"
 "./Core/Src/stm32wlxx_it.o"

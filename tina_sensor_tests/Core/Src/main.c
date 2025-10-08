@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include <stdio.h>
+//#include "bme280_support2.c"
+#include "bme280.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -101,7 +103,25 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+//	  for (uint8_t i = 1; i < 128; i++) {
+//	      if (HAL_I2C_IsDeviceReady(&hi2c1, (i << 1), 2, 10) == HAL_OK) {
+//	          printf("Device found at 0x%02X\r\n", i);
+//	      }
+//	  }
+	  printf("Initializing BME280...\r\n");
+	      if (BME280_Init() == 0)
+	          printf("BME280 Initialized OK!\r\n");
+	      else
+	          printf("BME280 Init Failed!\r\n");
 
+	      float t, p, h;
+
+	      while (1)
+	      {
+	          BME280_ReadAll(&t, &p, &h);
+	          printf("Temp: %.2f °C, Pressure: %.2f hPa, Humidity: %.2f%%\r\n", t, p, h);
+	          HAL_Delay(1000);
+	      }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
