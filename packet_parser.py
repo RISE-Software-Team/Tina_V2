@@ -7,43 +7,36 @@ PORT = "/dev/ttyUSB1"
 BAUD = 9600
 
 PACKET_HEADER = 0xAA
+
 PACKET_TYPE_TELEMETRY = 0x01
-PACKET_TYPE_INFO = 0x02
-PACKET_TYPE_ERROR = 0x03
-PACKET_TYPE_DEBUG = 0x04
-MAX_MESSAGE_LEN = 90
+PACKET_TYPE_LOG       = 0x02  # all logs now go here
+MAX_MESSAGE_LEN       = 90
 
-
-ERROR_CODES = {
-    0x01: "ERR_IMU_FAIL",
-    0x02: "ERR_IMU_INIT_FAIL",
-    0x03: "ERR_IMU_CALIB_FAIL",
-    0x04: "ERR_BARO_FAIL",
-    0x05: "ERR_BARO_INIT_FAIL",
-    0x06: "ERR_BARO_CALIB_FAIL",
-    0x07: "ERR_PYRO_DROGUE_FAIL",
-    0x08: "ERR_PYRO_MAIN_FAIL",
-    0x09: "ERR_TIMEOUT_APOGEE",
-    0x0A: "ERR_MISC_ERR",
-    0x0B: "ERR_LOGIC_FAIL",
-    0x0C: "ERR_COMPONENT_SANITY_CHECK_FAIL",
+# Mapping code values to strings
+MESSAGE_CODES = {
+    1:  "INFO_ENTERED_PREFLIGHT_STAGE",
+    2:  "INFO_ENTERED_POWERED_ASCENT_STAGE",
+    3:  "INFO_ENTERED_DROGUE_DESCENT_STAGE",
+    4:  "INFO_ENTERED_MAIN_DESCENT_STAGE",
+    5:  "INFO_ENTERED_TOUCHDOWN_STAGE",
+    6:  "INFO_DROGUE_PARACHUTE_DEPLOYED",
+    7:  "INFO_MAIN_PARACHUTE_DEPLOYED",
+    8:  "INFO_COMPONENT_SANITY_CHECK_PASS",
+    -1: "ERR_IMU_FAIL",
+    -2: "ERR_IMU_INIT_FAIL",
+    -3: "ERR_IMU_CALIB_FAIL",
+    -4: "ERR_BARO_FAIL",
+    -5: "ERR_BARO_INIT_FAIL",
+    -6: "ERR_BARO_CALIB_FAIL",
+    -7: "ERR_PYRO_DROGUE_FAIL",
+    -8: "ERR_PYRO_MAIN_FAIL",
+    -9: "ERR_TIMEOUT_APOGEE",
+    -10:"ERR_MISC_ERR",
+    -11:"ERR_LOGIC_FAIL",
+    -12:"ERR_COMPONENT_SANITY_CHECK_FAIL",
 }
 
-INFO_CODES = {
-    0x01: "INFO_ENTERED_PREFLIGHT_STAGE",
-    0x02: "INFO_ENTERED_POWERED_ASCENT_STAGE",
-    0x03: "INFO_ENTERED_DROGUE_DESCENT_STAGE",
-    0x04: "INFO_ENTERED_MAIN_DESCENT_STAGE",
-    0x05: "INFO_ENTERED_TOUCHDOWN_STAGE",
-    0x06: "INFO_DROGUE_PARACHUTE_DEPLOYED",
-    0x07: "INFO_MAIN_PARACHUTE_DEPLOYED",
-    0x08: "INFO_COMPONENT_SANITY_CHECK_PASS",
-}
 
-SEVERITY_CODES = {
-    0x01: "WARNING",
-    0x02: "ERROR",
-}
 
 def calc_checksum(data: bytes) -> int:
     """XOR checksum matching sender C code."""
@@ -92,47 +85,25 @@ def parse_packet(buf: bytes):
             "sys_state": sys_state
         })
 
-    elif pkt_type == PACKET_TYPE_ERROR:
-        severity = buf[9]
-        err_code = buf[10]
 
-        return ("error", {
-            "seq": seq,
-            "timestamp": timestamp,
-            "severity": severity,
-            "severity_str": SEVERITY_CODES.get(severity, f"UNKNOWN({severity})"),
-            "err_code": err_code,
-            "err_code_str": ERROR_CODES.get(err_code, f"UNKNOWN({err_code})")
-        })
+    elif pkt_type == PACKET_TYPE_LOG:
+        # Code is signed 8-bit
+        code_byte = buf[9]
+        code = struct.unpack(">b", bytes([code_byte]))[0]  # int8_t
 
-    elif pkt_type == PACKET_TYPE_INFO:
-        info_code = buf[9]
-        return ("info", {
-            "seq": seq,
-            "timestamp": timestamp,
-            "info_code": info_code,
-            "info_code_str": INFO_CODES.get(info_code, f"UNKNOWN({info_code})")
-        })
-
-    elif pkt_type == PACKET_TYPE_DEBUG:
-        severity = buf[9]
-        err_code = buf[10]
-
-        # Calculate optional message length
-        msg_len = length - (11 + 1)  # 11 bytes header (up to code) + CRC
+        # Message length
+        msg_len = buf[10]
         if msg_len > 0:
             message_bytes = buf[11:11+msg_len]
             message = message_bytes.decode(errors="replace")
         else:
             message = None
 
-        return ("debug", {
+        return ("log", {
             "seq": seq,
             "timestamp": timestamp,
-            "severity": severity,
-            "severity_str": SEVERITY_CODES.get(severity, f"UNKNOWN({severity})"),
-            "err_code": err_code,
-            "err_code_str": ERROR_CODES.get(err_code, f"UNKNOWN({err_code})"),
+            "code": code,
+            "code_str": MESSAGE_CODES.get(code, f"UNKNOWN({code})"),
             "message": message
         })
 
@@ -151,7 +122,7 @@ def send_at_command(ser, cmd, wait=1.0):
 
 def main():
     print(f"Opening {PORT} @ {BAUD}...")
-    ser = serial.Serial(PORT, BAUD, timeout=0.1)
+    ser = serial.Serial(PORT, BAUD, timeout=0.05)  # shorter timeout
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     time.sleep(2)
@@ -164,36 +135,45 @@ def main():
     print("\nModule configured. Listening for packets...\n")
 
     regex_rx = re.compile(r'\+TEST:\s*RX\s*"([0-9A-Fa-f]+)"')
+    buffer = ""
 
     while True:
-        line = ser.readline().decode(errors="ignore").strip()
-        if not line:
+        data = ser.read(256).decode(errors="ignore")
+        if not data:
             continue
 
-        match = regex_rx.search(line)
-        if match:
-            hex_payload = match.group(1)
-            try:
-                packet_bytes = binascii.unhexlify(hex_payload)
+        buffer += data
 
-                parsed = parse_packet(packet_bytes)
-                if parsed:
-                    pkt_type, d = parsed
-                    if pkt_type == "telemetry":
-                        print(f"[TLM] seq={d['seq']} ts={d['timestamp']} alt={d['altitude']}")
-                        print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
-                        print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
-                        print(f"      event_flags={d['event_flags']:02X} sys_state={d['sys_state']:02X}")
-                    elif pkt_type == "error":
-                        print(f"[ERR] seq={d['seq']} ts={d['timestamp']} severity={d['severity_str']} code={d['err_code_str']}")
-                    elif pkt_type == "info":
-                        print(f"[INFO] seq={d['seq']} ts={d['timestamp']} code={d['info_code_str']}")
-                    elif pkt_type == "debug":
-                        print(f"[DEBUG] seq={d['seq']} ts={d['timestamp']} severity={d['severity_str']} code={d['err_code_str']}")
-                        if d['message']:
-                            print(f"        msg: {d['message']}")
-            except Exception as e:
-                print(f"[ERROR] Failed to parse RX hex: {e}")
+        # Process all lines we can find
+        while "\n" in buffer:
+            line, buffer = buffer.split("\n", 1)
+            line = line.strip()
+            if not line:
+                continue
+
+            match = regex_rx.search(line)
+            if match:
+                hex_payload = match.group(1)
+                try:
+                    packet_bytes = binascii.unhexlify(hex_payload)
+
+                    parsed = parse_packet(packet_bytes)
+                    if parsed:
+                        pkt_type, d = parsed
+                        if pkt_type == "telemetry":
+                            print(f"[TLM] seq={d['seq']} ts={d['timestamp']} alt={d['altitude']}")
+                            print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
+                            print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
+                            print(f"      event_flags={d['event_flags']:02X} sys_state={d['sys_state']:02X}")
+                        elif pkt_type == "log":
+                            log_type = "INFO" if d['code'] > 0 else "ERROR"
+                            print(f"[{log_type}] seq={d['seq']} ts={d['timestamp']} code={d['code_str']}")
+                            if d['message']:
+                                print(f"        msg: {d['message']}")
+
+                except Exception as e:
+                    print(f"[ERROR] Failed to parse RX hex: {e}")
+
 
 
 if __name__ == "__main__":

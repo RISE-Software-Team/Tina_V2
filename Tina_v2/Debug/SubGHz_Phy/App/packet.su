@@ -1,8 +1,6 @@
-../SubGHz_Phy/App/packet.c:16:13:Pack16	16	static
-../SubGHz_Phy/App/packet.c:21:13:Pack32	16	static
-../SubGHz_Phy/App/packet.c:28:9:Packet_CalculateChecksum	24	static
-../SubGHz_Phy/App/packet.c:35:9:Packet_BuildHeader	24	static
-../SubGHz_Phy/App/packet.c:49:9:Packet_BuildTelemetry	24	static
-../SubGHz_Phy/App/packet.c:73:9:Packet_BuildError	24	static
-../SubGHz_Phy/App/packet.c:88:9:Packet_BuildDebug	32	static
-../SubGHz_Phy/App/packet.c:109:9:Packet_BuildInfo	24	static
+../SubGHz_Phy/App/packet.c:17:13:pack_16	16	static
+../SubGHz_Phy/App/packet.c:22:13:pack_32	16	static
+../SubGHz_Phy/App/packet.c:29:9:packet_calculate_checksum	24	static
+../SubGHz_Phy/App/packet.c:36:9:packet_build_header	24	static
+../SubGHz_Phy/App/packet.c:50:9:packet_build_telemetry	24	static
+../SubGHz_Phy/App/packet.c:74:9:packet_build_log	24	static

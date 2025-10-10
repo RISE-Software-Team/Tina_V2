@@ -11,14 +11,19 @@
 #include <logger.h>
 #include <stdint.h>
 
-#define MAX_MESSAGE_LEN 64
 
 typedef enum {
     PACKET_TYPE_TELEMETRY = 0x01,
-    PACKET_TYPE_INFO      = 0x02,
-    PACKET_TYPE_ERROR     = 0x03,
-	PACKET_TYPE_DEBUG	  = 0x04,
+    PACKET_TYPE_LOG     = 0x02,
 } PacketType_t;
+
+typedef struct {
+    uint8_t  header;
+    uint16_t seq_num;
+    uint8_t  packet_len;
+    uint32_t timestamp;
+    uint8_t  packet_type;
+} HeaderPacket;
 
 typedef struct {
     int16_t acc_x, acc_y, acc_z;
@@ -26,27 +31,16 @@ typedef struct {
     uint32_t altitude;
     uint8_t event_flags;
     uint8_t sys_state;
-} TelemetryData_t;
-
-#pragma pack(push,1)
+} TelemetryPacket_t;
 
 typedef struct {
-    Severity_t severity;
-    ErrorCode_t err_code;
-    const char *message;
-} ErrorData_t;
-
-#pragma pack(pop)
-
-typedef struct {
-	InfoCode_t info_code;
-	//potentially add variable length message
-} InfoData_t;
+	MessageCode_t code;
+	uint8_t message_len;
+	const char *message;
+} LogPacket_t;
 
 
-uint8_t Packet_BuildTelemetry(uint8_t *buffer, const TelemetryData_t *data);
-uint8_t Packet_BuildError(uint8_t *buffer, const ErrorData_t *data);
-uint8_t Packet_BuildInfo(uint8_t *buffer, const InfoData_t *data);
-uint8_t Packet_CalculateChecksum(const uint8_t *buffer, uint8_t len);
+uint8_t packet_build_telemetry(uint8_t *buffer, const TelemetryPacket_t *data);
+uint8_t packet_build_log(uint8_t *buffer, const LogPacket_t *data);
 
 #endif // PACKET_H

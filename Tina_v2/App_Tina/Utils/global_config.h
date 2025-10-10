@@ -1,12 +1,28 @@
 #ifndef GLOBAL_CONFIG_H
 #define GLOBAL_CONFIG_H
 
+#include "packet.h"
 //--- LOGGER ---
 
-#define ENABLE_RADIO_LOG   0 // this enables error reports
-#define ENABLE_RADIO_DEBUG 1 // Radio used for debugging, allows for multiple characters
+#define DEBUG 1 // Radio used for debugging, allows for strings
 
 #define ENABLE_SERIAL_LOG   0 // // This used by logger to send serial data over uart pins
+
+
+#if (DEBUG == 1)
+
+#define MAX_PACKET_LENGTH 64
+
+#else
+
+#define MAX_PACKET_LENGTH 32
+
+#endif
+
+#define CRC_SIZE 1
+#define LOG_HEADER_SIZE 2  // message code + message length
+#define MAX_LOG_MESSAGE_LEN (MAX_PACKET_LENGTH - sizeof(HeaderPacket) - LOG_HEADER_SIZE - CRC_SIZE)
+
 
 // --- LAUNCH AND APOGEE DETECTION  ---
 

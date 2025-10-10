@@ -99,14 +99,12 @@ int main(void)
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
 
-
-
+  HAL_Delay(2000);
 
   	if (BME280_Init() == 0){
-  		Radio_SendInfo(INFO_COMPONENT_SANITY_CHECK_PASS);
-
+  		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "BME280 init passed");
   	}else {
-		ErrorHandler_Report(SEV_ERROR, ERR_BARO_INIT_FAIL, "MODULE FAILED TO INIT");
+		tlog(ERR_BARO_INIT_FAIL, "MODULE FAILED TO INIT");
   	  }
   /* USER CODE END 2 */
 
@@ -115,20 +113,21 @@ int main(void)
 	while (1)
 	{
 		float t, p, h;
+		 HAL_Delay(2000);
+
 
 		if (BME280_ReadAll(&t, &p, &h) != 0) {
-		    ErrorHandler_Report(SEV_ERROR, ERR_BARO_FAIL, "BME280 read failed!");
+		    tlog(ERR_BARO_FAIL, "BME280 read failed!");
 		} else {
 		    char msg[64];
 		    int pres_int = (int)p;
 		    snprintf(msg, sizeof(msg), "Pres: %d hPa", pres_int);
 
-		    ErrorHandler_Report(SEV_ERROR, ERR_BARO_FAIL, msg);
+		   tlog(ERR_BARO_FAIL, msg);
 
 		}
-		HAL_Delay(1000);
-		}
   /* USER CODE END 3 */
+}
 }
 
 /**
@@ -197,6 +196,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
+
 
 #ifdef  USE_FULL_ASSERT
 /**
