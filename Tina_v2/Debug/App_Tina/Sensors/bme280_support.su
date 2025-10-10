@@ -1,6 +1,0 @@
-../App_Tina/Sensors/bme280_support.c:19:4:I2C_routine	4	static
-../App_Tina/Sensors/bme280_support.c:28:4:BME280_I2C_bus_write	32	static
-../App_Tina/Sensors/bme280_support.c:36:4:BME280_I2C_bus_read	32	static
-../App_Tina/Sensors/bme280_support.c:44:6:BME280_delay_msek	16	static
-../App_Tina/Sensors/bme280_support.c:50:5:BME280_Init	8	static
-../App_Tina/Sensors/bme280_support.c:69:5:BME280_ReadAll	40	static
