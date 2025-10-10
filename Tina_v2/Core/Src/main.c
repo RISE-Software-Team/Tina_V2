@@ -17,15 +17,19 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <logger.h>
 #include "main.h"
+#include "dma.h"
+#include "i2c.h"
 #include "app_subghz_phy.h"
 #include "usart.h"
 #include "gpio.h"
-#include "packet.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "logger.h"
+#include "packet.h"
+#include "bme280_support.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,42 +92,42 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SubGHz_Phy_Init();
   MX_USART2_UART_Init();
+  MX_USART1_UART_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  TelemetryData_t telemetry_test = {
-      .acc_x = 100,
-      .acc_y = -50,
-      .acc_z = 1024,
-      .gyro_x = 10,
-      .gyro_y = -20,
-      .gyro_z = 5,
-      .altitude = 12345,
-      .event_flags = 0x01,
-      .sys_state = 0x02
-  };
 
-  // Example error data
-  ErrorData_t error_test = {
-      .severity = SEV_ERROR,
-      .err_code = ERR_IMU_FAIL
-  };
+
+
+
+  	if (BME280_Init() == 0){
+  		Radio_SendInfo(INFO_COMPONENT_SANITY_CHECK_PASS);
+
+  	}else {
+		ErrorHandler_Report(SEV_ERROR, ERR_BARO_INIT_FAIL, "MODULE FAILED TO INIT");
+  	  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  MX_SubGHz_Phy_Process();
+	while (1)
+	{
+		float t, p, h;
 
-	  Radio_SendTelemetry_Packet(&telemetry_test);
-	  Radio_SendError_Packet(&error_test);
+		if (BME280_ReadAll(&t, &p, &h) != 0) {
+		    ErrorHandler_Report(SEV_ERROR, ERR_BARO_FAIL, "BME280 read failed!");
+		} else {
+		    char msg[64];
+		    int pres_int = (int)p;
+		    snprintf(msg, sizeof(msg), "Pres: %d hPa", pres_int);
 
-    /* USER CODE END WHILE */
+		    ErrorHandler_Report(SEV_ERROR, ERR_BARO_FAIL, msg);
 
-
-    /* USER CODE BEGIN 3 */
-  }
+		}
+		HAL_Delay(1000);
+		}
   /* USER CODE END 3 */
 }
 

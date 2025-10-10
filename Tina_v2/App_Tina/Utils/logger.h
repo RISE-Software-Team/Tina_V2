@@ -43,6 +43,7 @@ typedef enum {
 	INFO_MAIN_PARACHUTE_DEPLOYED = 0x07,
 
 	INFO_COMPONENT_SANITY_CHECK_PASS = 0x08,
+
 } InfoCode_t;
 
 
@@ -51,5 +52,11 @@ typedef enum {
     SEV_ERROR   = 0x02,
 } Severity_t;
 
-void ErrorHandler_Report(Severity_t type, ErrorCode_t code, const char *msg);
+#define MAX_MESSAGE_LENGTH 16
+
+void Radio_SendInfo(InfoCode_t info_code);
+void ErrorHandler_Report(Severity_t severity, ErrorCode_t err_code, const char *msg);
+
+
+
 #endif /* UTILS_LOGGER_H_ */

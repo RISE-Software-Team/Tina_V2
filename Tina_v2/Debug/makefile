@@ -22,6 +22,7 @@ RM := rm -rf
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
 -include App_Tina/Utils/subdir.mk
+-include App_Tina/Sensors/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -74,7 +75,7 @@ main-build: Tina_v2.elf secondary-outputs
 
 # Tool invocations
 Tina_v2.elf Tina_v2.map: $(OBJS) $(USER_OBJS) /home/krissal1234/Documents/projects/rise/Tina_V2/Tina_v2/STM32WLE5JCIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Tina_v2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/krissal1234/Documents/projects/rise/Tina_V2/Tina_v2/STM32WLE5JCIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tina_v2.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "Tina_v2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/krissal1234/Documents/projects/rise/Tina_V2/Tina_v2/STM32WLE5JCIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Tina_v2.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

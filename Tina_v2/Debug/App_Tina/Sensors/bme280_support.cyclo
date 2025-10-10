@@ -1,0 +1,6 @@
+../App_Tina/Sensors/bme280_support.c:19:4:I2C_routine	1
+../App_Tina/Sensors/bme280_support.c:28:4:BME280_I2C_bus_write	2
+../App_Tina/Sensors/bme280_support.c:36:4:BME280_I2C_bus_read	2
+../App_Tina/Sensors/bme280_support.c:44:6:BME280_delay_msek	1
+../App_Tina/Sensors/bme280_support.c:50:5:BME280_Init	1
+../App_Tina/Sensors/bme280_support.c:69:5:BME280_ReadAll	2

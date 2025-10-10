@@ -11,10 +11,13 @@
 #include <logger.h>
 #include <stdint.h>
 
+#define MAX_MESSAGE_LEN 64
+
 typedef enum {
     PACKET_TYPE_TELEMETRY = 0x01,
     PACKET_TYPE_INFO      = 0x02,
     PACKET_TYPE_ERROR     = 0x03,
+	PACKET_TYPE_DEBUG	  = 0x04,
 } PacketType_t;
 
 typedef struct {
@@ -25,10 +28,15 @@ typedef struct {
     uint8_t sys_state;
 } TelemetryData_t;
 
+#pragma pack(push,1)
+
 typedef struct {
-	Severity_t severity;
-	ErrorCode_t err_code;
+    Severity_t severity;
+    ErrorCode_t err_code;
+    const char *message;
 } ErrorData_t;
+
+#pragma pack(pop)
 
 typedef struct {
 	InfoCode_t info_code;

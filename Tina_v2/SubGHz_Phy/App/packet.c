@@ -10,7 +10,7 @@
 
 #define PACKET_HEADER 0xAA
 
-static uint16_t seq_num = 0;
+uint16_t seq_num = 0;
 
 
 static void Pack16(uint8_t *buf, uint16_t value) {
@@ -60,10 +60,12 @@ uint8_t Packet_BuildTelemetry(uint8_t *buffer, const TelemetryData_t *data) {
     Pack32(&buffer[idx], data->altitude); idx += 4;
     buffer[idx++] = data->event_flags;
     buffer[idx++] = data->sys_state;
+    buffer[3] = idx+1; //accounting for the checksum
+
 
     uint8_t crc = Packet_CalculateChecksum(buffer, idx);
     buffer[idx++] = crc;
-    buffer[3] = idx;
+
 
     return idx;
 }
@@ -75,10 +77,31 @@ uint8_t Packet_BuildError(uint8_t *buffer, const ErrorData_t *data) {
     buffer[idx++] = PACKET_TYPE_ERROR;
     buffer[idx++] = data->severity;
     buffer[idx++] = data->err_code;
-
+    buffer[3] = idx+1;
     uint8_t crc = Packet_CalculateChecksum(buffer, idx);
     buffer[idx++] = crc;
-    buffer[3] = idx;
+
+
+    return idx;
+}
+
+uint8_t Packet_BuildDebug(uint8_t *buffer, const ErrorData_t *data) {
+    uint8_t idx = Packet_BuildHeader(buffer);
+
+    buffer[idx++] = PACKET_TYPE_DEBUG;
+    buffer[idx++] = data->severity;
+    buffer[idx++] = data->err_code;
+
+
+    if (data->message != NULL) {
+        size_t len = strnlen(data->message, MAX_MESSAGE_LEN);
+        memcpy(&buffer[idx], data->message, len);
+        idx += len;
+    }
+
+    buffer[3] = idx + 1; // total length including checksum
+    uint8_t crc = Packet_CalculateChecksum(buffer, idx);
+    buffer[idx++] = crc;
 
     return idx;
 }
@@ -90,10 +113,10 @@ uint8_t Packet_BuildInfo(uint8_t *buffer, const InfoData_t *data) {
     buffer[idx++] = PACKET_TYPE_INFO;
 
     buffer[idx++] = data->info_code;
-
+    buffer[3] = idx+1;
     uint8_t crc = Packet_CalculateChecksum(buffer, idx);
     buffer[idx++] = crc;
-    buffer[3] = idx;
+
 
     return idx;
 }

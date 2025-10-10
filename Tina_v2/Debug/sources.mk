@@ -23,6 +23,7 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+App_Tina/Sensors \
 App_Tina/Utils \
 Core/Src \
 Core/Startup \

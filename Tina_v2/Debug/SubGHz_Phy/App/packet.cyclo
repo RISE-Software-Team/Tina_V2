@@ -3,5 +3,6 @@
 ../SubGHz_Phy/App/packet.c:28:9:Packet_CalculateChecksum	2
 ../SubGHz_Phy/App/packet.c:35:9:Packet_BuildHeader	1
 ../SubGHz_Phy/App/packet.c:49:9:Packet_BuildTelemetry	1
-../SubGHz_Phy/App/packet.c:71:9:Packet_BuildError	1
-../SubGHz_Phy/App/packet.c:86:9:Packet_BuildInfo	1
+../SubGHz_Phy/App/packet.c:73:9:Packet_BuildError	1
+../SubGHz_Phy/App/packet.c:88:9:Packet_BuildDebug	2
+../SubGHz_Phy/App/packet.c:109:9:Packet_BuildInfo	1

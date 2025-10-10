@@ -1,4 +1,2 @@
-../App_Tina/Utils/logger.c:12:13:Radio_SendInfo	1
-../App_Tina/Utils/logger.c:22:13:Radio_SendError	1
-../App_Tina/Utils/logger.c:37:13:Log_Error	2
-../App_Tina/Utils/logger.c:47:6:ErrorHandler_Report	1
+../App_Tina/Utils/logger.c:9:6:Radio_SendInfo	1
+../App_Tina/Utils/logger.c:20:6:ErrorHandler_Report	1

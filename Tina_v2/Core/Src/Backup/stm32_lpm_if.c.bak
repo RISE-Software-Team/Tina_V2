@@ -25,6 +25,7 @@
 #include "usart_if.h"
 
 /* USER CODE BEGIN Includes */
+//#include "usart_if.h"
 
 /* USER CODE END Includes */
 
@@ -122,7 +123,7 @@ void PWR_ExitStopMode(void)
   /* Resume not retained USARTx and DMA */
   vcom_Resume();
   /* USER CODE BEGIN ExitStopMode_2 */
-
+//  vcom_Resume();
   /* USER CODE END ExitStopMode_2 */
 }
 

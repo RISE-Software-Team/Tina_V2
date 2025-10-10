@@ -107,8 +107,6 @@ static void OnRxError(void);
 /* USER CODE BEGIN PFP */
 
 
-void Radio_SendInfo(void);
-void radio_SendErr(void);
 
 /* USER CODE END PFP */
 
@@ -172,14 +170,14 @@ void SubghzApp_Process(void)
 }
 
 
-void Radio_SendTelemetry_Packet(const TelemetryData_t *telemetry)
+void Radio_SendTelemetry_Packet(const TelemetryData_t *telemetry_packet)
 {
-    if (!telemetry) {
+    if (!telemetry_packet) {
         ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Telemetry pointer NULL");
         return;
     }
 
-    uint8_t len = Packet_BuildTelemetry(BufferTx, telemetry);
+    uint8_t len = Packet_BuildTelemetry(BufferTx, telemetry_packet);
 
     if (len == 0) {
         ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Telemetry packet build failed");
@@ -206,6 +204,32 @@ void Radio_SendError_Packet(const ErrorData_t *err_packet)
     }
 
     uint8_t len = Packet_BuildError(BufferTx, err_packet);
+
+    if (len == 0) {
+        ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet build failed");
+        return;
+    }
+
+    if (len > MAX_APP_BUFFER_SIZE) {
+        ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet overflow");
+        return;
+    }
+
+    radio_status_t send_status = Radio.Send(BufferTx, len);
+
+       if (send_status != RADIO_STATUS_OK){
+           ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "Radio send failed");
+       }
+}
+
+void Radio_SendDebug_Packet(const ErrorData_t *debug_packet)
+{
+    if (!debug_packet) {
+        ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet pointer NULL");
+        return;
+    }
+
+    uint8_t len = Packet_BuildDebug(BufferTx, debug_packet);
 
     if (len == 0) {
         ErrorHandler_Report(SEV_ERROR, ERR_MISC_ERR, "Error packet build failed");

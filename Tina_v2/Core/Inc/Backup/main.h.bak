@@ -64,8 +64,6 @@ void Error_Handler(void);
 #define DBG3_GPIO_Port GPIOB
 #define DBG4_Pin GPIO_PIN_4
 #define DBG4_GPIO_Port GPIOB
-#define USARTx_RX_Pin GPIO_PIN_7
-#define USARTx_RX_GPIO_Port GPIOB
 #define LED2_Pin GPIO_PIN_5
 #define LED2_GPIO_Port GPIOB
 #define DBG1_Pin GPIO_PIN_0
@@ -73,8 +71,6 @@ void Error_Handler(void);
 #define BUT1_Pin GPIO_PIN_13
 #define BUT1_GPIO_Port GPIOB
 #define BUT1_EXTI_IRQn EXTI15_10_IRQn
-#define USARTx_TX_Pin GPIO_PIN_6
-#define USARTx_TX_GPIO_Port GPIOB
 #define DBG2_Pin GPIO_PIN_10
 #define DBG2_GPIO_Port GPIOB
 #define RF_CTRL2_Pin GPIO_PIN_5

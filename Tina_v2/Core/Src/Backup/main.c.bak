@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
+#include "i2c.h"
 #include "app_subghz_phy.h"
 #include "usart.h"
 #include "gpio.h"
@@ -25,6 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+//#include "logger.h"
+#include "packet.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,8 +91,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SubGHz_Phy_Init();
   MX_USART2_UART_Init();
+  MX_USART1_UART_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   TelemetryData_t telemetry_test = {
       .acc_x = 100,
@@ -105,18 +112,75 @@ int main(void)
   // Example error data
   ErrorData_t error_test = {
       .severity = SEV_ERROR,
-      .err_code = ERR_IMU_FAIL
+      .err_code = ERR_BARO_INIT_FAIL
   };
+
+  InfoData_t baro_test = {
+		  .info_code = INFO_COMPONENT_SANITY_CHECK_PASS
+  };
+//
+//  Radio_SendInfo_Packet(&baro_test);
+//
+//  Radio_SendTelemetry_Packet(&telemetry_test);
+//  Radio_SendError_Packet(&error_test);
+
+  /* Run inside USER CODE BEGIN 2 or inside while(1) */
+//  HAL_Delay(1000); // give BNO055 time to boot up
+//
+//  HAL_StatusTypeDef result;
+//  char msg[50];
+//  uint8_t i;
+//  uint8_t devices_found = 0;
+//
+//  for (i = 1; i < 128; i++)
+//  {
+//      result = HAL_I2C_IsDeviceReady(&hi2c2, i << 1, 1, 10);
+//      if (result == HAL_OK)
+//      {
+//          snprintf(msg, sizeof(msg), "at 0x%02X", i);
+//          ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, msg);
+//          devices_found++;
+//      }
+//  }
+//
+//  if (devices_found == 0)
+//  {
+//      ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "None found");
+//  }
+//  HAL_Delay(500);
+//  result = HAL_I2C_IsDeviceReady(&hi2c2, 0x28 << 1, 3, 100);
+//  if (result == HAL_OK)
+//      ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "0x28 detected!");
+//  else
+//      ErrorHandler_Report(SEV_WARNING, ERR_MISC_ERR, "0x28 not responding");
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  printf("test");
-	  fflush(stdout);
+//	  MX_SubGHz_Phy_PrEocess();
+//
+//	  Radio_SendTelemetry_Packet(&telemetry_test);
+//	  Radio_SendError_Packet(&error_test);
+	  printf("testing");
+	if (BME280_Init() == 0){
+		Radio_SendInfo_Packet(&baro_test);
+	}else {
+		Radio_SendError_Packet(&error_test);
 
+  	  }
+		  float t, p, h;
 
+		  while (1)
+		  {
+			  BME280_ReadAll(&t, &p, &h);
+			  ErrorHandler_Report(SEV_ERROR,ERR_BARO_FAIL, "Temp: %.2f °C, Pressure: %.2f hPa, Humidity: %.2f%%\r\n", t, p, h);
+//			  printf("Temp: %.2f °, Pressure: %.2f hPa, Humidity: %.2f%%\r\n", t, p, h);
+			  HAL_Delay(2000);
+		  }
     /* USER CODE END WHILE */
     MX_SubGHz_Phy_Process();
 
