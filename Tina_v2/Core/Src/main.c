@@ -26,10 +26,17 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
+
+#include "global_config.h"
 #include "logger.h"
 #include "packet.h"
+
+#include "types_support.h"
 #include "bme280_support.h"
+#include "bno055_support.h"
+
+#include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,6 +46,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -71,7 +79,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -98,36 +105,49 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
+  
+    if (BME280_Init()) {
+    	tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
+    	HAL_Delay(500);
+    }
 
-  HAL_Delay(2000);
+    if (bno055_init_accgyro()) {
+    	tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
+    	HAL_Delay(500);
+    }
 
-  	if (BME280_Init() == 0){
-  		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "BME280 init passed");
-  	}else {
-		tlog(ERR_BARO_INIT_FAIL, "MODULE FAILED TO INIT");
-  	  }
+    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
+    HAL_Delay(500);
+
+	char log_msg[MAX_LOG_MESSAGE_LEN];
+	struct bno055_accel_t bno055_accel;
+	float t, p, h;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		float t, p, h;
-		 HAL_Delay(2000);
-
-
-		if (BME280_ReadAll(&t, &p, &h) != 0) {
-		    tlog(ERR_BARO_FAIL, "BME280 read failed!");
+		if (BME280_ReadAll(&t, &p, &h) == 0) {
+			snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
+			tlog(ERR_BARO_FAIL, log_msg);
 		} else {
-		    char msg[64];
-		    int pres_int = (int)p;
-		    snprintf(msg, sizeof(msg), "Pres: %d hPa", pres_int);
-
-		   tlog(ERR_BARO_FAIL, msg);
-
+			tlog(ERR_BARO_FAIL, "BME280 read failed");
 		}
+
+		HAL_Delay(500);
+
+		if (bno055_read_accel_xyz(&bno055_accel) == 0) {
+			snprintf(log_msg, sizeof(log_msg), "Accel (x, y, z): (%d, %d, %d)", bno055_accel.x, bno055_accel.y, bno055_accel.z);
+			tlog(ERR_IMU_FAIL, log_msg);
+		} else {
+			tlog(ERR_IMU_FAIL, "BNO055 read failed");
+		}
+
+		HAL_Delay(500);
+	}
   /* USER CODE END 3 */
-}
 }
 
 /**
