@@ -1,6 +1,0 @@
-../SubGHz_Phy/App/packet.c:17:13:pack_16	16	static
-../SubGHz_Phy/App/packet.c:22:13:pack_32	16	static
-../SubGHz_Phy/App/packet.c:29:9:packet_calculate_checksum	24	static
-../SubGHz_Phy/App/packet.c:36:9:packet_build_header	24	static
-../SubGHz_Phy/App/packet.c:50:9:packet_build_telemetry	24	static
-../SubGHz_Phy/App/packet.c:74:9:packet_build_log	24	static

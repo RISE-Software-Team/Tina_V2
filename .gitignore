@@ -4,10 +4,10 @@
 #metadata
 .metadata/
 # STM32CubeIDE project folders
-LoRaE5_Test/.settings/
-LoRaE5_Test/.metadata/
-LoRaE5_Test/Debug/
-LoRaE5_Test/Release/
+Tina_v2/.settings/
+Tina_v2/.metadata/
+Tina_v2/Debug/
+Tina_v2/Release/
 
 # Object and build files
 *.d
