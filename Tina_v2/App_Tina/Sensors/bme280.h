@@ -59,7 +59,7 @@
 #ifndef __BME280_H__
 #define __BME280_H__
 
-
+#ifndef TYPES_SUPPORT_H
 /*!
 * @brief The following definition uses for define the data types
 *
@@ -306,6 +306,7 @@ typedef	unsigned long int u64;/**< used for unsigned 64bit */
 #else
 #warning The data types defined above which not supported \
 define the data types manually
+#endif
 #endif
 #endif
 #endif
