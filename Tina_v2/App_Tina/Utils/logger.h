@@ -19,6 +19,7 @@ typedef enum {
     INFO_DROGUE_PARACHUTE_DEPLOYED        = 6,
     INFO_MAIN_PARACHUTE_DEPLOYED          = 7,
     INFO_COMPONENT_SANITY_CHECK_PASS      = 8,
+	INFO_DEBUG							  = 9,
 
     // ---------- ERROR CODES (negative) ----------
     ERR_IMU_FAIL                          = -1,   // BNO055 failure
@@ -35,7 +36,9 @@ typedef enum {
 
     ERR_MISC_ERR                          = -10,  // Undefined software exception
     ERR_LOGIC_FAIL                        = -11,  // FSM state went invalid
-    ERR_COMPONENT_SANITY_CHECK_FAIL       = -12
+    ERR_COMPONENT_SANITY_CHECK_FAIL       = -12,
+
+	ERR_DEBUG							  = 13
 } MessageCode_t;
 
 

@@ -60,7 +60,7 @@ typedef struct{
 
 
 
-// I2C command IDs
+
 #define CMD_ARM        0x01
 #define CMD_FIRE       0x03
 #define CMD_READ       0x04
@@ -75,7 +75,6 @@ typedef struct{
 #define TX_ACK 0x00
 #define TX_NACK 0xFF
 
-//void pyro_set_state(py_state_t new_state);
 void pyro_handle_command(CommandPacket_t *cmd, uint8_t *tx_buffer);
 uint8_t pyro_read(PyroChannels_t pyro_channel);
 void pyro_fire(uint8_t channel);

@@ -46,7 +46,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define PYRO_BOARD_ADDR 0x42
+#define CMD_ARM        0x01
+#define CMD_FIRE       0x03
+#define CMD_READ       0x04
+#define CMD_STATUS     0x05
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -68,7 +72,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t tx_data[2];
+uint8_t rx_data[2];
+char msg[64];
 /* USER CODE END 0 */
 
 /**
@@ -123,24 +129,33 @@ int main(void)
 	struct bno055_accel_t bno055_accel;
 	float t, p, h;
 
+	 tx_data[0] = CMD_ARM;
+	 tx_data[1] = 0x00;
+
+	 HAL_I2C_Master_Transmit(&hi2c2, PYRO_BOARD_ADDR, tx_data, 2, HAL_MAX_DELAY);
+	 HAL_Delay(10);
+	 HAL_I2C_Master_Receive(&hi2c2, PYRO_BOARD_ADDR, rx_data, 2, HAL_MAX_DELAY);
+
+	 snprintf(msg, sizeof(msg), "ARM: ACK=%02X DATA=%02X\r\n", rx_data[0], rx_data[1]);
+	 tlog(INFO_DEBUG, msg);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		if (BME280_ReadAll(&t, &p, &h) == 0) {
-			snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
-			tlog(ERR_BARO_FAIL, log_msg);
-		} else {
-			tlog(ERR_BARO_FAIL, "BME280 read failed");
-		}
-
-		HAL_Delay(500);
+//		if (BME280_ReadAll(&t, &p, &h) == 0) {
+//			snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
+//			tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
+//		} else {
+//			tlog(ERR_BARO_FAIL, "BME280 read failed");
+//		}
+//
+//		HAL_Delay(500);
 
 		if (bno055_read_accel_xyz(&bno055_accel) == 0) {
 			snprintf(log_msg, sizeof(log_msg), "Accel (x, y, z): (%d, %d, %d)", bno055_accel.x, bno055_accel.y, bno055_accel.z);
-			tlog(ERR_IMU_FAIL, log_msg);
+			tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
 		} else {
 			tlog(ERR_IMU_FAIL, "BNO055 read failed");
 		}

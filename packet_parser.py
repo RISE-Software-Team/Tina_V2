@@ -3,7 +3,7 @@ import struct
 import time
 import re
 import binascii
-PORT = "/dev/ttyUSB1"
+PORT = "/dev/ttyUSB0"
 BAUD = 9600
 
 PACKET_HEADER = 0xAA
@@ -22,6 +22,7 @@ MESSAGE_CODES = {
     6:  "INFO_DROGUE_PARACHUTE_DEPLOYED",
     7:  "INFO_MAIN_PARACHUTE_DEPLOYED",
     8:  "INFO_COMPONENT_SANITY_CHECK_PASS",
+    9:  "INFO_DEBUG",
     -1: "ERR_IMU_FAIL",
     -2: "ERR_IMU_INIT_FAIL",
     -3: "ERR_IMU_CALIB_FAIL",
@@ -34,6 +35,7 @@ MESSAGE_CODES = {
     -10:"ERR_MISC_ERR",
     -11:"ERR_LOGIC_FAIL",
     -12:"ERR_COMPONENT_SANITY_CHECK_FAIL",
+    -13:"ERR_DEBUG",
 }
 
 
