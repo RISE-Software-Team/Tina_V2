@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "pyro_fsm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +60,8 @@ static void MX_I2C1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 #define I2C_SLAVE_ADDR 0x42
+uint8_t rx_buffer[2];
+uint8_t tx_buffer[2];
 
 /* USER CODE END 0 */
 
@@ -95,6 +97,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_I2C_Slave_Receive_IT(&hi2c1, rx_buffer, 2);
+
 
   /* USER CODE END 2 */
 
@@ -168,7 +173,7 @@ static void MX_I2C1_Init(void)
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
   hi2c1.Init.Timing = 0x00201D2B;
-  hi2c1.Init.OwnAddress1 = I2C_SLAVE_ADDR;
+  hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;
@@ -277,6 +282,19 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+    CommandPacket_t packet;
+    packet.cmd = rx_buffer[0];
+    packet.param = rx_buffer[1];
+
+    pyro_handle_command(&packet, tx_buffer);
+
+    HAL_I2C_Slave_Transmit_IT(&hi2c1, tx_buffer, 2);
+
+    HAL_I2C_Slave_Receive_IT(&hi2c1, rx_buffer, 2);
+}
+
 
 /* USER CODE END 4 */
 

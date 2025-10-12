@@ -61,7 +61,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* Radio events function pointer */
 static RadioEvents_t RadioEvents;
-
+static volatile bool radio_busy = false;
 /* USER CODE BEGIN PV */
 
 static uint8_t BufferTx[MAX_PACKET_LENGTH];
@@ -166,6 +166,7 @@ void SubghzApp_Process(void)
 
 void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet)
 {
+
     if (!telemetry_packet) {
         tlog(ERR_MISC_ERR, "Telemetry pointer NULL");
         return;
@@ -192,6 +193,9 @@ void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet)
 
 void subghz_send_log_packet(const LogPacket_t *log_packet)
 {
+	if (radio_busy){
+		return;
+	}
     if (!log_packet) {
         tlog(ERR_MISC_ERR, "Log packet pointer NULL");
         return;
@@ -202,7 +206,7 @@ void subghz_send_log_packet(const LogPacket_t *log_packet)
         tlog(ERR_MISC_ERR, "Error packet overflow");
         return;
     }
-
+    radio_busy= true;
     radio_status_t send_status = Radio.Send(BufferTx, len);
 
     if (send_status != RADIO_STATUS_OK){
@@ -219,6 +223,8 @@ void subghz_send_log_packet(const LogPacket_t *log_packet)
 static void OnTxDone(void)
 {
   /* USER CODE BEGIN OnTxDone */
+   radio_busy = false;
+
 
   /* USER CODE END OnTxDone */
 }
@@ -238,6 +244,7 @@ static void OnTxTimeout(void)
 static void OnRxTimeout(void)
 {
   /* USER CODE BEGIN OnRxTimeout */
+    radio_busy = false;
   /* USER CODE END OnRxTimeout */
 }
 
