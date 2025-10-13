@@ -23,6 +23,7 @@
 #include "app_subghz_phy.h"
 #include "usart.h"
 #include "gpio.h"
+#include "pyro_manager.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -46,11 +47,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PYRO_BOARD_ADDR 0x42
-#define CMD_ARM        0x01
-#define CMD_FIRE       0x03
-#define CMD_READ       0x04
-#define CMD_STATUS     0x05
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -72,9 +69,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t tx_data[2];
-uint8_t rx_data[2];
-char msg[64];
+
 /* USER CODE END 0 */
 
 /**
@@ -111,57 +106,63 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  
+	HAL_Delay(1000);
+
     if (BME280_Init()) {
     	tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
-    	HAL_Delay(500);
     }
 
     if (bno055_init_accgyro()) {
     	tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
-    	HAL_Delay(500);
     }
+	HAL_Delay(1000);
 
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
-    HAL_Delay(500);
+    HAL_Delay(1000);
 
 	char log_msg[MAX_LOG_MESSAGE_LEN];
 	struct bno055_accel_t bno055_accel;
 	float t, p, h;
 
-	 tx_data[0] = CMD_ARM;
-	 tx_data[1] = 0x00;
+	arm_pyros();
 
-	 HAL_I2C_Master_Transmit(&hi2c2, PYRO_BOARD_ADDR, tx_data, 2, HAL_MAX_DELAY);
-	 HAL_Delay(10);
-	 HAL_I2C_Master_Receive(&hi2c2, PYRO_BOARD_ADDR, rx_data, 2, HAL_MAX_DELAY);
-
-	 snprintf(msg, sizeof(msg), "ARM: ACK=%02X DATA=%02X\r\n", rx_data[0], rx_data[1]);
-	 tlog(INFO_DEBUG, msg);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1)
-	{
-//		if (BME280_ReadAll(&t, &p, &h) == 0) {
-//			snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
-//			tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-//		} else {
-//			tlog(ERR_BARO_FAIL, "BME280 read failed");
-//		}
+//  while (1)
+//  {
+//	    MX_SubGHz_Phy_Process();
 //
-//		HAL_Delay(500);
+//
+//	if (BME280_ReadAll(&t, &p, &h) == 0) {
+//		snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
+//		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
+//	} else {
+//		tlog(ERR_BARO_FAIL, "BME280 read failed");
+//	}
 
-		if (bno055_read_accel_xyz(&bno055_accel) == 0) {
-			snprintf(log_msg, sizeof(log_msg), "Accel (x, y, z): (%d, %d, %d)", bno055_accel.x, bno055_accel.y, bno055_accel.z);
-			tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-		} else {
-			tlog(ERR_IMU_FAIL, "BNO055 read failed");
-		}
 
-		HAL_Delay(500);
-	}
+//	HAL_Delay(200);
+//
+//	if (bno055_read_accel_xyz(&bno055_accel) == 0) {
+//		snprintf(log_msg, sizeof(log_msg), "Accel (x, y, z): (%d, %d, %d)", bno055_accel.x, bno055_accel.y, bno055_accel.z);
+//		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
+//	} else {
+//		tlog(ERR_IMU_FAIL, "BNO055 read failed");
+//	}
+//
+//	if (HAL_I2C_GetError(&hi2c2) != HAL_OK) {
+//	    HAL_I2C_DeInit(&hi2c2);
+//	    HAL_I2C_Init(&hi2c2);
+//	    tlog(ERR_IMU_FAIL, "I2C LINE HAD TO BE RESET");
+//	}
+
+//	HAL_Delay(500);
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
   /* USER CODE END 3 */
 }
 
@@ -231,7 +232,6 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
 
 #ifdef  USE_FULL_ASSERT
 /**

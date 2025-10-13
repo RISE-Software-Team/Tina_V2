@@ -38,7 +38,6 @@
         * Output
         * EVENT_OUT
         * EXTI
-     PB6   ------> I2C1_SCL
      PC1   ------> I2S2_SD
 */
 void MX_GPIO_Init(void)
@@ -79,14 +78,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUT1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PB6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PC1 */
   GPIO_InitStruct.Pin = GPIO_PIN_1;

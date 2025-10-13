@@ -30,7 +30,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
 #include "packet.h"
-
+#include "global_config.h"
 
 /* USER CODE END Includes */
 
@@ -41,11 +41,8 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* MODEM type: one shall be 1 the other shall be 0 */
-
-//#define CFG_SEQ_Task_SubGHz_Phy_App_Process 0  // pick an unused task slot
-
-//Packet Types
-#define PACKET_HEADER 0xAA
+#define USE_MODEM_LORA  1
+#define USE_MODEM_FSK   0
 
 #define RF_FREQUENCY                                868000000 /* Hz */
 
@@ -53,6 +50,7 @@ extern "C" {
 #define TX_OUTPUT_POWER                             14        /* dBm */
 #endif /* TX_OUTPUT_POWER */
 
+#if (( USE_MODEM_LORA == 1 ) && ( USE_MODEM_FSK == 0 ))
 #define LORA_BANDWIDTH                              0         /* [0: 125 kHz, 1: 250 kHz, 2: 500 kHz, 3: Reserved] */
 #define LORA_SPREADING_FACTOR                       7         /* [SF7..SF12] */
 #define LORA_CODINGRATE                             1         /* [1: 4/5, 2: 4/6, 3: 4/7, 4: 4/8] */
@@ -61,9 +59,18 @@ extern "C" {
 #define LORA_FIX_LENGTH_PAYLOAD_ON                  false
 #define LORA_IQ_INVERSION_ON                        false
 
+#elif (( USE_MODEM_LORA == 0 ) && ( USE_MODEM_FSK == 1 ))
 
+#define FSK_FDEV                                    25000     /* Hz */
+#define FSK_DATARATE                                50000     /* bps */
+#define FSK_BANDWIDTH                               50000     /* Hz */
+#define FSK_PREAMBLE_LENGTH                         5         /* Same for Tx and Rx */
+#define FSK_FIX_LENGTH_PAYLOAD_ON                   false
 
-#define PAYLOAD_LEN                                 64
+#else
+#error "Please define a modem in the compiler subghz_phy_app.h."
+#endif /* USE_MODEM_LORA | USE_MODEM_FSK */
+
 
 /* USER CODE BEGIN EC */
 
@@ -79,6 +86,30 @@ extern "C" {
 #define LORA_SYMBOL_TIMEOUT                         5         /* Symbols */
 #define LORA_FIX_LENGTH_PAYLOAD_ON                  false
 #define LORA_IQ_INVERSION_ON                        false
+
+
+#define TX_QUEUE_SIZE 10
+
+
+typedef struct {
+    PacketType_t type;
+    union {
+        TelemetryPacket_t telemetry;
+        LogPacket_t log;
+    } data;
+    uint8_t payload[MAX_LOG_MESSAGE_LEN]; //per packet buffer
+    uint8_t length;
+} TxQueueItem_t;
+
+typedef struct {
+    TxQueueItem_t items[TX_QUEUE_SIZE];
+    uint8_t head;
+    uint8_t tail;
+    uint8_t count;
+} TxQueue_t;
+
+
+
 /* USER CODE END EC */
 
 /* External variables --------------------------------------------------------*/
@@ -100,6 +131,7 @@ void SubghzApp_Init(void);
 /* USER CODE BEGIN EFP */
 
 void SubghzApp_Process(void);
+
 void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet);
 void subghz_send_log_packet(const LogPacket_t *log_packet);
 /* USER CODE END EFP */
