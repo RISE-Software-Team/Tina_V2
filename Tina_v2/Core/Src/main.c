@@ -120,9 +120,9 @@ int main(void)
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
     HAL_Delay(1000);
 
-	char log_msg[MAX_LOG_MESSAGE_LEN];
-	struct bno055_accel_t bno055_accel;
-	float t, p, h;
+//	char log_msg[MAX_LOG_MESSAGE_LEN];
+//	struct bno055_accel_t bno055_accel;
+//	float t, p, h;
 
 	arm_pyros();
 
@@ -164,7 +164,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-}
+//}
 
 /**
   * @brief System Clock Configuration
