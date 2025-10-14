@@ -64,7 +64,6 @@ static RadioEvents_t RadioEvents;
 
 /* USER CODE BEGIN PV */
 
-static uint8_t BufferTx[MAX_PACKET_LENGTH];
 
 /* USER CODE END PV */
 
@@ -147,13 +146,14 @@ void SubghzApp_Init(void)
 	Radio.SetMaxPayloadLength(MODEM_LORA, MAX_PACKET_LENGTH);
 	Radio.SetPublicNetwork(false);
 
-	memset(BufferTx, 0x0, MAX_PACKET_LENGTH);
+//	memset(BufferTx, 0x0, MAX_PACKET_LENGTH);
 	memset(&txQueue, 0, sizeof(txQueue));
 
 
 
 
 	UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), UTIL_SEQ_RFU, Subghz_ProcessQueue);
+
 	UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
 
 
@@ -205,29 +205,19 @@ static void Subghz_ProcessQueue(void) {
 
 void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet)
 {
+	 if (!telemetry_packet) {
+	        tlog(ERR_MISC_ERR, "Log packet pointer NULL");
+	        return;
+	    }
 
-    if (!telemetry_packet) {
-        tlog(ERR_MISC_ERR, "Telemetry pointer NULL");
-        return;
-    }
+	    TxQueueItem_t packet_enqueue;
+	    packet_enqueue.type = PACKET_TYPE_TELEMETRY;
+	    packet_enqueue.data.telemetry = *telemetry_packet;
+	    packet_enqueue.length = packet_build_telemetry(packet_enqueue.payload, &packet_enqueue.data.telemetry);
 
-    uint8_t len = packet_build_telemetry(BufferTx, telemetry_packet);
+	    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_PACKET_LENGTH) return;
 
-    if (len == 0) {
-        tlog(ERR_MISC_ERR, "Telemetry packet build failed");
-        return;
-    }
-
-    if (len > MAX_PACKET_LENGTH) {
-        tlog(ERR_MISC_ERR, "Telemetry packet overflow");
-        return;
-    }
-
-//    radio_status_t send_status = Radio.Send(BufferTx, len);
-//
-//    if (send_status != RADIO_STATUS_OK){
-//        tlog(ERR_MISC_ERR, "Radio send failed");
-//    }
+	    enqueue_packet(&packet_enqueue);
 }
 
 void subghz_send_log_packet(const LogPacket_t *log_packet)
@@ -242,7 +232,7 @@ void subghz_send_log_packet(const LogPacket_t *log_packet)
     packet_enqueue.data.log = *log_packet;
     packet_enqueue.length = packet_build_log(packet_enqueue.payload, &packet_enqueue.data.log);
 
-    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_LOG_MESSAGE_LEN) return;
+    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_PACKET_LENGTH) return;
 
     enqueue_packet(&packet_enqueue);
 

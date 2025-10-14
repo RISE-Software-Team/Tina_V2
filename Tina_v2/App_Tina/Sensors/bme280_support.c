@@ -1,6 +1,7 @@
 #include "main.h"
 #include "bme280.h"
-
+#include "logger.h"
+#include <stdio.h>
 #define BME280_API
 
 #ifdef BME280_API
@@ -49,8 +50,18 @@ void BME280_delay_msek(u32 msek)
 /* Simple initialization */
 s32 BME280_Init(void)
 {
+//    I2C_routine();
+//    return bme280_init(&bme280);
     I2C_routine();
-    return bme280_init(&bme280);
+    s32 rslt = bme280_init(&bme280);
+
+    bme280_set_oversamp_temperature(BME280_OVERSAMP_1X);
+    bme280_set_oversamp_pressure(BME280_OVERSAMP_1X);
+    bme280_set_oversamp_humidity(BME280_OVERSAMP_1X);
+
+    bme280_set_power_mode(BME280_NORMAL_MODE);
+
+    return rslt;
 }
 
 /* Read temperature, pressure, humidity once */
@@ -72,7 +83,13 @@ int BME280_ReadAll(float *temp, float *press, float *hum)
 
     BME280_RETURN_FUNCTION_TYPE status =
         bme280_read_uncomp_pressure_temperature_humidity(&uncomp_pres, &uncomp_temp, &uncomp_hum);
+		char log_msg[64];
 
+//    	snprintf(log_msg, sizeof(log_msg), "uncomp_pres: %ld ", uncomp_pres);
+//    	tlog(ERR_BARO_CALIB_FAIL, log_msg);
+//
+//    	snprintf(log_msg, sizeof(log_msg), "status: %d ", status);
+//    	tlog(ERR_BARO_CALIB_FAIL, log_msg);
 
     if (status == ERROR) {
         return -1;

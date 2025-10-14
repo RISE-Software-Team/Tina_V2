@@ -89,12 +89,11 @@ uint8_t packet_build_log(uint8_t *buffer, const LogPacket_t *data)
         idx += msg_len;
     }
 
-    buffer[3] = idx + 1;  // +1 for upcoming CRC byte
-
+    buffer[3] = idx + 1;
     uint8_t crc = packet_calculate_checksum(buffer, idx);
     buffer[idx++] = crc;
 
-    return idx; // total packet size
+    return idx;
 }
 
 
