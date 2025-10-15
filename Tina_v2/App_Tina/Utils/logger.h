@@ -21,6 +21,15 @@ typedef enum {
     INFO_COMPONENT_SANITY_CHECK_PASS      = 8,
 	INFO_DEBUG							  = 9,
 
+	INFO_LAUNCH_DETECTED                  = 10,  // Launch detected
+	INFO_APOGEE_DETECTED                  = 11,  // Apogee detected
+	INFO_MAIN_ALTITUDE_REACHED            = 12,  // Main deployment altitude reached
+	INFO_TOUCHDOWN_DETECTED               = 13,  // Touchdown detected
+	INFO_FSM_STATE_TRANSITION             = 14,  // General state transition
+	INFO_GROUND_ALTITUDE_SET              = 15,  // Ground altitude reference set
+	INFO_CONFIG_LOADED                    = 16,  // Configuration loaded from SD
+	INFO_FLIGHT_SUMMARY                   = 17,  // Flight summary data
+
     // ---------- ERROR CODES (negative) ----------
     ERR_IMU_FAIL                          = -1,   // BNO055 failure
     ERR_IMU_INIT_FAIL                     = -2,
@@ -38,7 +47,12 @@ typedef enum {
     ERR_LOGIC_FAIL                        = -11,  // FSM state went invalid
     ERR_COMPONENT_SANITY_CHECK_FAIL       = -12,
 
-	ERR_DEBUG							  = 13
+	ERR_DEBUG                             = -13,
+	ERR_FSM_INIT_FAIL                     = -14,  // FSM initialization failed
+	ERR_FSM_INVALID_STATE                 = -15,  // FSM entered invalid state
+	ERR_PREFLIGHT_TIMEOUT                 = -16,  // Preflight stage timeout
+	ERR_CONFIG_LOAD_FAIL                  = -17,  // Failed to load configuration
+	ERR_SENSOR_UPDATE_FAIL                = -18   // Sensor data update failed
 } MessageCode_t;
 
 
