@@ -5,6 +5,7 @@
 	*      Author: krissal1234
 	*/
 
+#include "types_support.h"
 #include "bno055_api.h"
 
 #define BNO_I2C_TIMEOUT_MS 100

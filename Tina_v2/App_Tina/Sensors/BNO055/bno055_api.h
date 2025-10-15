@@ -8,9 +8,14 @@
 #ifndef BNO055_API_H
 #define BNO055_API_H
 
-#include "Drivers/bno055.h"
 #include "main.h"
-#include "types_support.h"
+
+// Include BNO055 driver - it defines its own s32/u32 as int/unsigned int
+// These are ABI-compatible with int32_t/uint32_t on ARM Cortex-M4
+#include "Drivers/bno055.h"
+
+// Don't include types_support.h here to avoid redefinition errors
+// Users of this API should include types_support.h separately if needed
 #include "logger.h"
 
 // External I2C handle (defined in main.c or i2c.c)

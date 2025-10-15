@@ -9,9 +9,14 @@
 #define BME280_API_H
 
 #include "Drivers/bme280.h"
+
+// Undefine ERROR macro from bme280.h to prevent conflict with STM32 HAL
+#ifdef ERROR
+#undef ERROR
+#endif
+
 #include "main.h"
 #include "types_support.h"
-#include "logger.h"
 
 // External I2C handle
 extern I2C_HandleTypeDef hi2c2;
