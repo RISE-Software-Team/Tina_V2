@@ -6,9 +6,12 @@
  */
 
 #include "packet.h"
+
 #include "main.h"
+#include "config.h"
+
 #include <string.h>
-#include "global_config.h"
+
 #define PACKET_HEADER 0xAA
 
 uint16_t seq_num = 0;

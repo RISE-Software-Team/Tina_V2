@@ -26,8 +26,8 @@
 
 /* USER CODE BEGIN Includes */
 #include "stm32_seq.h"
-#include "global_config.h"
 #include "stm32_timer.h"
+
 #include <stdio.h>
 
 /* USER CODE END Includes */

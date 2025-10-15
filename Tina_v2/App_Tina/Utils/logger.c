@@ -1,8 +1,10 @@
-#include <logger.h>
-#include "subghz_phy_app.h"
+#include "logger.h"
+
+#include "config.h"
 #include "packet.h"
+#include "subghz_phy_app.h"
+
 #include <stdio.h>
-#include "global_config.h"
 #include <string.h>
 
 void tlog(MessageCode_t code, const char *msg) {

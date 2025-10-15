@@ -28,9 +28,10 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdint.h>
+#include "config.h"
 #include "packet.h"
-#include "global_config.h"
+
+#include <stdint.h>
 
 /* USER CODE END Includes */
 

@@ -27,12 +27,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
-#include "global_config.h"
+#include "config.h"
 #include "logger.h"
 #include "packet.h"
+#include "types.h"
 
-#include "types_support.h"
 #include "bme280_support.h"
 #include "bno055_support.h"
 

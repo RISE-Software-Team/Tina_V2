@@ -1,7 +1,8 @@
-#ifndef GLOBAL_CONFIG_H
-#define GLOBAL_CONFIG_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include "packet.h"
+#include <packet.h>
+
 //--- LOGGER ---
 
 #define DEBUG 1 // Radio used for debugging, allows for strings
