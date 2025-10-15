@@ -6,6 +6,7 @@
  */
 
 #include "bme280_api.h"
+#include "logger.h"
 
 // Pointer to the currently registered driver (mock or hardware)
 static const BME280_Driver_t *registered_driver = NULL;
