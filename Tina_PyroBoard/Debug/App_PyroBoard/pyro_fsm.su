@@ -1,4 +1,0 @@
-../App_PyroBoard/pyro_fsm.c:13:6:pyro_arm	8	static
-../App_PyroBoard/pyro_fsm.c:29:6:pyro_handle_command	24	static
-../App_PyroBoard/pyro_fsm.c:56:9:pyro_read	32	static
-../App_PyroBoard/pyro_fsm.c:86:6:pyro_fire	16	static
