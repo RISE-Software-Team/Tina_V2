@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef int8_t   s8;
 typedef int16_t  s16;
@@ -13,5 +14,12 @@ typedef uint8_t  u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
+
+typedef float    f32;
+typedef double   f64;
+typedef bool     boolean;
+
+#define STATUS_OK       0
+#define STATUS_ERROR   -1
 
 #endif /* TYPES_SUPPORT_H_ */

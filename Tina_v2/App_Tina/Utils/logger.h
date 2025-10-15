@@ -1,5 +1,5 @@
 /*
- * error_handler.h
+ * logger.h
  *
  *  Created on: Oct 7, 2025
  *      Author: krissal1234
@@ -8,6 +8,9 @@
 #ifndef UTILS_LOGGER_H_
 #define UTILS_LOGGER_H_
 
+#include "types_support.h"
+
+// Message codes for logging (positive = info, negative = error)
 typedef enum {
 	// ---------- INFO CODES (positive) ----------
 	INFO_DEBUG                            = 0,
@@ -51,7 +54,6 @@ typedef enum {
 	ERR_MISC_ERR                          = -12,  // Undefined software exception
 	ERR_LOGIC_FAIL                        = -13,  // FSM state went invalid
 } MessageCode_t;
-
 
 void tlog(MessageCode_t message_code, const char *msg);
 
