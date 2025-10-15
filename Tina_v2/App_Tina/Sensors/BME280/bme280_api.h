@@ -17,6 +17,7 @@
 
 #include "main.h"
 #include "types_support.h"
+#include "logger.h"
 
 // External I2C handle
 extern I2C_HandleTypeDef hi2c2;

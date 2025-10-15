@@ -31,10 +31,9 @@
 #include "global_config.h"
 #include "logger.h"
 #include "packet.h"
-
 #include "types_support.h"
-#include "bme280_api.h"
-#include "bno055_api.h"
+#include "BME280/bme280_api.h"
+#include "BNO055/bno055_api.h"
 
 #include "flight_fsm.h"
 

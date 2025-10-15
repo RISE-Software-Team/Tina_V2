@@ -6,6 +6,7 @@
 	*/
 
 #include "bme280_api.h"
+#include "logger.h"
 
 #define BME_I2C_TIMEOUT_MS 100
 
