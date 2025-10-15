@@ -7,8 +7,8 @@
 
 #include "flight_fsm.h"
 #include "pyro_manager.h"
-#include "bno055_api.h"
-#include "bme280_api.h"
+#include "../Sensors/BME280/bme280_api.h"
+#include "../Sensors/BNO055/bno055_api.h"
 #include <math.h>
 #include <string.h>
 
