@@ -11,6 +11,7 @@
 #include "../Sensors/BNO055/bno055_api.h"
 #include <math.h>
 #include <string.h>
+#include <stdio.h>
 
 // Helper function to calculate altitude from pressure
 static float calculate_altitude_from_pressure(

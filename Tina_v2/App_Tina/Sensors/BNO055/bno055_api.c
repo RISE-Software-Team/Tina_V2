@@ -5,6 +5,7 @@
  *      Author: pranavsuri4303
  */
 
+#include "types_support.h"
 #include "bno055_api.h"
 
 // Pointer to the currently registered driver (mock or hardware)
