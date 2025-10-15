@@ -23,6 +23,15 @@ typedef enum {
 	INFO_DROGUE_PARACHUTE_DEPLOYED        = 7,
 	INFO_MAIN_PARACHUTE_DEPLOYED          = 8,
 
+	INFO_LAUNCH_DETECTED                  = 10,  // Launch detected
+	INFO_APOGEE_DETECTED                  = 11,  // Apogee detected
+	INFO_MAIN_ALTITUDE_REACHED            = 12,  // Main deployment altitude reached
+	INFO_TOUCHDOWN_DETECTED               = 13,  // Touchdown detected
+	INFO_FSM_STATE_TRANSITION             = 14,  // General state transition
+	INFO_GROUND_ALTITUDE_SET              = 15,  // Ground altitude reference set
+	INFO_CONFIG_LOADED                    = 16,  // Configuration loaded from SD
+	INFO_FLIGHT_SUMMARY                   = 17,  // Flight summary data
+
     // ---------- ERROR CODES (negative) ----------
 	ERR_COMPONENT_SANITY_CHECK_FAIL       = -1,
 

@@ -21,23 +21,26 @@
 #define LOG_HEADER_SIZE 2  // message code + message length
 #define MAX_LOG_MESSAGE_LEN (MAX_PACKET_LENGTH - sizeof(HeaderPacket) - LOG_HEADER_SIZE - CRC_SIZE)
 
+// --- FLIGHT STATE MACHINE CONFIG ---
 
-// --- LAUNCH AND APOGEE DETECTION  ---
+// Launch detection
+#define LAUNCH_ACCEL_THRESHOLD 3.0f     // Minimum acceleration to detect launch (g)
+#define LAUNCH_ALTITUDE_THRESHOLD 10.0f // Minimum altitude to detect launch (m)
 
-#define LAUNCH_ACCEL_THRESHOLD 3.0     // Minimum acceleration to detect launch (g)
-#define LAUNCH_ALTITUDE_THRESHOLD 10.0  // Minimum altitude to detect launch (m)
-#define APOGEE_TIMEOUT 120          // Max time after launch for drogue trigger (s)
+// Apogee detection
+#define APOGEE_DELTA_H 2.0f              // Altitude change threshold for apogee (m)
+#define APOGEE_SAMPLE_COUNT 5            // Number of samples to confirm apogee
+#define APOGEE_VELOCITY_EPSILON 0.5f     // Velocity tolerance for apogee detection (m/s)
+#define APOGEE_TIMEOUT_MS 120000         // Max time after launch for drogue (ms)
 
+// Main chute deployment
+#define MAIN_DEPLOY_ALTITUDE 100.0f      // Altitude to deploy main chute (m)
 
-// --- RECOVERY ---
+// Touchdown detection
+#define TOUCHDOWN_ACCEL_TOLERANCE 0.5f   // Allowed deviation from 1g (g)
+#define TOUCHDOWN_SAMPLE_COUNT 10        // Number of samples to confirm touchdown
 
-#define MAIN_DEPLOY_ALTITUDE 100     // Altitude to deploy the main chute (m)
-
-
-// --- TOUCHDOWN DETECTION CONFIG ---
-
-#define TOUCHDOWN_ACCEL_TOLERANCE 0.5f  // Allowed deviation from -9.81 m/s² (m/s²)
-#define TOUCHDOWN_STABLE_TIME 5.0f      // Duration acceleration must be stable to confirm touchdown (s)
-
+// Preflight
+#define PREFLIGHT_TIMEOUT_MS 300000      // Max time in preflight before error (ms)
 
 #endif // GLOBAL_CONFIG_H
