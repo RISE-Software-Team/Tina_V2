@@ -1,7 +1,13 @@
+/*
+ * logger.h
+ *
+ *  Created on: Oct 7, 2025
+ *      Author: pranavsuri4303
+ */
+
 #ifndef FLIGHT_FSM_H
 #define FLIGHT_FSM_H
 
-#include <stdbool.h>
 #include "types_support.h"
 #include "logger.h"
 #include "global_config.h"
@@ -67,7 +73,7 @@ typedef struct {
 } FlightFSM_t;
 
 // Init and update
-int flight_fsm_init(FlightFSM_t *fsm);
+MessageCode_t flight_fsm_init(FlightFSM_t *fsm);
 void flight_fsm_update_sensors(FlightFSM_t *fsm, float accel_x, float accel_y,
                                 float accel_z, float altitude,
                                 float temperature, float pressure);
