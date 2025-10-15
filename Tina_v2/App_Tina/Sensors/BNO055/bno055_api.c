@@ -60,7 +60,7 @@ MessageCode_t bno055_init_accgyro(void) {
 }
 
 // Read acceleration data (X, Y, Z axes)
-MessageCode_t bno055_read_accel_xyz(struct bno055_accel_t *accel) {
+MessageCode_t BNO055_ReadAccel(struct bno055_accel_t *accel) {
 	s8 result;
 	
 	// Null pointer check
