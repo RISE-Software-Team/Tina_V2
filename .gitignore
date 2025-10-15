@@ -3,6 +3,7 @@
 
 #metadata
 .metadata/
+
 # STM32CubeIDE project folders
 Tina_v2/.settings/
 Tina_v2/.metadata/
@@ -17,3 +18,5 @@ Tina_v2/Release/
 *.hex
 *.bin
 
+# VSCode
+.vscode/

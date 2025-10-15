@@ -33,8 +33,10 @@
 #include "packet.h"
 
 #include "types_support.h"
-#include "bme280_support.h"
-#include "bno055_support.h"
+#include "bme280_api.h"
+#include "bno055_api.h"
+
+#include "flight_fsm.h"
 
 #include <stdio.h>
 
@@ -58,6 +60,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+static FlightFSM_t flight_fsm;
 
 /* USER CODE END PV */
 
@@ -109,11 +113,11 @@ int main(void)
 	HAL_Delay(1000);
 
     if (BME280_Init()) {
-    	tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
+      tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
     }
 
     if (bno055_init_accgyro()) {
-    	tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
+      tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
     }
 	HAL_Delay(1000);
 
