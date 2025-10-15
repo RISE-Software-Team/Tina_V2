@@ -6,17 +6,13 @@
 
 #define DEBUG 1 // Radio used for debugging, allows for strings
 
-#define ENABLE_SERIAL_LOG   0 // // This used by logger to send serial data over uart pins
+//#define ENABLE_SERIAL_LOG 1 // This used by logger to send serial data over uart pins
 
 
-#if (DEBUG == 1)
-
+#ifdef DEBUG
 #define MAX_PACKET_LENGTH 64
-
 #else
-
 #define MAX_PACKET_LENGTH 32
-
 #endif
 
 #define CRC_SIZE 1
