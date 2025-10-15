@@ -1,5 +1,5 @@
 /*
- * error_handler.h
+ * logger.h
  *
  *  Created on: Oct 7, 2025
  *      Author: krissal1234
@@ -8,6 +8,9 @@
 #ifndef UTILS_LOGGER_H_
 #define UTILS_LOGGER_H_
 
+#include "types_support.h"
+
+// Message codes for logging (positive = info, negative = error)
 typedef enum {
     // ---------- INFO CODES (positive) ----------
     INFO_ENTERED_PREFLIGHT_STAGE          = 1,
@@ -55,9 +58,6 @@ typedef enum {
 	ERR_SENSOR_UPDATE_FAIL                = -18   // Sensor data update failed
 } MessageCode_t;
 
-
 void tlog(MessageCode_t message_code, const char *msg);
-
-
 
 #endif /* UTILS_LOGGER_H_ */
