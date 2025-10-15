@@ -59,6 +59,8 @@
 
 /* USER CODE BEGIN PV */
 
+static FlightFSM_t flight_fsm;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
