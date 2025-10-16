@@ -170,9 +170,9 @@ void SubghzApp_Process(void)
 	Radio.IrqProcess();
 }
 
-static bool enqueue_packet(const TxQueueItem_t *packet) {
+static bool enqueue_packet(TxQueueItem_t packet) {
     if (txQueue.count >= TX_QUEUE_SIZE) return false;
-    txQueue.items[txQueue.tail] = *packet;
+    txQueue.items[txQueue.tail] = packet;
     txQueue.tail = (txQueue.tail + 1) % TX_QUEUE_SIZE; //we use modulus to make sure it wraps around
     txQueue.count++;
     return true;
@@ -203,41 +203,27 @@ static void Subghz_ProcessQueue(void) {
 
 
 
-void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet)
+void subghz_send_telemetry_packet(TelemetryPacket_t telemetry)
 {
-	 if (!telemetry_packet) {
-	        tlog(ERR_MISC_ERR, "Log packet pointer NULL");
-	        return;
-	    }
+	    TxQueueItem_t item;
 
-	    TxQueueItem_t packet_enqueue;
-	    packet_enqueue.type = PACKET_TYPE_TELEMETRY;
-	    packet_enqueue.data.telemetry = *telemetry_packet;
-	    packet_enqueue.length = packet_build_telemetry(packet_enqueue.payload, &packet_enqueue.data.telemetry);
+	    item.length = packet_build_telemetry(item.payload, telemetry);
+	    if(item.length == 0 || item.length > MAX_PACKET_LENGTH)
+	    	return;
 
-	    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_PACKET_LENGTH) return;
-
-	    enqueue_packet(&packet_enqueue);
+	    enqueue_packet(item);
 }
 
-void subghz_send_log_packet(const LogPacket_t *log_packet)
+void subghz_send_log_packet(LogPacket_t log)
 {
-    if (!log_packet) {
-        tlog(ERR_MISC_ERR, "Log packet pointer NULL");
-        return;
-    }
 
-    TxQueueItem_t packet_enqueue;
-    packet_enqueue.type = PACKET_TYPE_LOG;
-    packet_enqueue.data.log = *log_packet;
-    packet_enqueue.length = packet_build_log(packet_enqueue.payload, &packet_enqueue.data.log);
+    TxQueueItem_t item;
 
-    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_PACKET_LENGTH) return;
+    item.length = packet_build_log(item.payload, log);
+    if(item.length == 0 || item.length > MAX_PACKET_LENGTH)
+    	return;
 
-    enqueue_packet(&packet_enqueue);
-
-
-
+    enqueue_packet(item);
 }
 
 
