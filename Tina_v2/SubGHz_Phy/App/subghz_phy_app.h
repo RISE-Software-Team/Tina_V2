@@ -89,7 +89,7 @@ extern "C" {
 #define LORA_IQ_INVERSION_ON                        false
 
 
-#define TX_QUEUE_SIZE 10
+#define TX_QUEUE_SIZE 20
 
 
 typedef struct {

@@ -110,14 +110,6 @@ void SubghzApp_Init(void)
 {
   /* USER CODE BEGIN SubghzApp_Init_1 */
 
-	  /* Radio initialization */
-	  RadioEvents.TxDone = OnTxDone;
-	  RadioEvents.RxDone = OnRxDone;
-	  RadioEvents.TxTimeout = OnTxTimeout;
-	  RadioEvents.RxTimeout = OnRxTimeout;
-	  RadioEvents.RxError = OnRxError;
-
-	  Radio.Init(&RadioEvents);
   /* USER CODE END SubghzApp_Init_1 */
 
   /* Radio initialization */
@@ -146,17 +138,10 @@ void SubghzApp_Init(void)
 	Radio.SetMaxPayloadLength(MODEM_LORA, MAX_PACKET_LENGTH);
 	Radio.SetPublicNetwork(false);
 
-//	memset(BufferTx, 0x0, MAX_PACKET_LENGTH);
 	memset(&txQueue, 0, sizeof(txQueue));
 
-
-
-
 	UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), UTIL_SEQ_RFU, Subghz_ProcessQueue);
-
 	UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
-
-
   /* USER CODE END SubghzApp_Init_2 */
 }
 
