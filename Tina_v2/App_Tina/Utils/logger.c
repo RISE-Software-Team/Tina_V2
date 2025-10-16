@@ -19,7 +19,7 @@ void tlog(MessageCode_t code, const char *msg) {
 	packet.message_len = (uint8_t) strnlen(msg, MAX_LOG_MESSAGE_LEN);
 #endif
 
-	subghz_send_log_packet(&packet);
+	subghz_send_log_packet(packet);
 
 #ifdef ENABLE_SERIAL_LOG
     printf("[LOG] %s | Code: 0x%02X | %s\n",

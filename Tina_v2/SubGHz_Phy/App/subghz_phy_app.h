@@ -89,16 +89,11 @@ extern "C" {
 #define LORA_IQ_INVERSION_ON                        false
 
 
-#define TX_QUEUE_SIZE 10
+#define TX_QUEUE_SIZE 20
 
 
 typedef struct {
-    PacketType_t type;
-    union {
-        TelemetryPacket_t telemetry;
-        LogPacket_t log;
-    } data;
-    uint8_t payload[MAX_LOG_MESSAGE_LEN]; //per packet buffer
+    uint8_t payload[MAX_PACKET_LENGTH];
     uint8_t length;
 } TxQueueItem_t;
 
@@ -133,8 +128,8 @@ void SubghzApp_Init(void);
 
 void SubghzApp_Process(void);
 
-void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet);
-void subghz_send_log_packet(const LogPacket_t *log_packet);
+void subghz_send_telemetry_packet(TelemetryPacket_t telemetry);
+void subghz_send_log_packet(LogPacket_t log);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus
