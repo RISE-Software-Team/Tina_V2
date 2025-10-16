@@ -67,9 +67,6 @@ static RadioEvents_t RadioEvents;
 
 /* USER CODE END PV */
 
-/* Private function prototypes -----------------------------------------------*/
-static void Subghz_ProcessQueue(void);
-
 /*!
  * @brief Function to be executed on Radio Tx Done event
  */
@@ -139,21 +136,10 @@ void SubghzApp_Init(void)
 	Radio.SetPublicNetwork(false);
 
 	memset(&txQueue, 0, sizeof(txQueue));
-
-	UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), UTIL_SEQ_RFU, Subghz_ProcessQueue);
-	UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END SubghzApp_Init_2 */
 }
 
 /* USER CODE BEGIN EF */
-
-
-void SubghzApp_Process(void)
-{
-	// This function handles all radio event callbacks and state transitions.
-	// It MUST be called frequently from the main application loop.
-	Radio.IrqProcess();
-}
 
 static bool enqueue_packet(TxQueueItem_t packet) {
     if (txQueue.count >= TX_QUEUE_SIZE) return false;
@@ -170,7 +156,9 @@ static bool dequeue_packet(TxQueueItem_t *packet) {
     txQueue.count--;
     return true;
 }
-static void Subghz_ProcessQueue(void) {
+
+void radio_send_packet()
+{
     if (txBusy) return;
     if (txQueue.count == 0) return;
 
@@ -186,22 +174,20 @@ static void Subghz_ProcessQueue(void) {
     }
 }
 
-
-
-void subghz_send_telemetry_packet(TelemetryPacket_t telemetry)
+void radio_send_telemetry_packet(TelemetryPacket_t telemetry)
 {
-	    TxQueueItem_t item;
+	TxQueueItem_t item;
 
-	    item.length = packet_build_telemetry(item.payload, telemetry);
-	    if(item.length == 0 || item.length > MAX_PACKET_LENGTH)
-	    	return;
+	item.length = packet_build_telemetry(item.payload, telemetry);
+	if(item.length == 0 || item.length > MAX_PACKET_LENGTH)
+		return;
 
-	    enqueue_packet(item);
+	enqueue_packet(item);
+	radio_send_packet();
 }
 
-void subghz_send_log_packet(LogPacket_t log)
+void radio_send_log_packet(LogPacket_t log)
 {
-
     TxQueueItem_t item;
 
     item.length = packet_build_log(item.payload, log);
@@ -209,8 +195,8 @@ void subghz_send_log_packet(LogPacket_t log)
     	return;
 
     enqueue_packet(item);
+	radio_send_packet();
 }
-
 
 /* USER CODE END EF */
 
@@ -218,9 +204,7 @@ void subghz_send_log_packet(LogPacket_t log)
 static void OnTxDone(void)
 {
   /* USER CODE BEGIN OnTxDone */
-	  txBusy = false;
-	  UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
-
+	txBusy = false;
   /* USER CODE END OnTxDone */
 }
 
@@ -233,8 +217,7 @@ static void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraS
 static void OnTxTimeout(void)
 {
   /* USER CODE BEGIN OnTxTimeout */
-	 txBusy = false;
-	 UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
+	txBusy = false;
   /* USER CODE END OnTxTimeout */
 }
 

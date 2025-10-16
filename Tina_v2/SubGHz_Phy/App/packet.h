@@ -14,7 +14,7 @@
 
 typedef enum {
     PACKET_TYPE_TELEMETRY = 0x01,
-    PACKET_TYPE_LOG     = 0x02,
+    PACKET_TYPE_LOG       = 0x02,
 } PacketType_t;
 
 typedef struct {
