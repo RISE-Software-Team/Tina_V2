@@ -5,12 +5,13 @@
 
 //--- LOGGER ---
 
-#define DEBUG 1 // Radio used for debugging, allows for strings
+#define TLOG_DEBUG 1 // Radio used for debugging, allows for strings
 
 //#define ENABLE_SERIAL_LOG 1 // This used by logger to send serial data over uart pins
 
+#define LOG_INTERVAL_MS 1000
 
-#ifdef DEBUG
+#ifdef TLOG_DEBUG
 #define MAX_PACKET_LENGTH 64
 #else
 #define MAX_PACKET_LENGTH 32

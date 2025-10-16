@@ -1,30 +1,60 @@
 #include "logger.h"
 
+#include "main.h"
 #include "config.h"
 #include "packet.h"
 #include "subghz_phy_app.h"
+#include "types.h"
 
 #include <stdio.h>
 #include <string.h>
 
-void tlog(MessageCode_t code, const char *msg) {
+
+#define NUM_MESSAGE_CODES 256 // (-128, 127)
+
+static u32 last_log_time[NUM_MESSAGE_CODES] = {0};
+
+
+static bool is_high_priority(MessageCode_t code)
+{
+	switch (code) {
+	case INFO_DEBUG:
+	case ERR_IMU_READ_ACCEL_FAIL:
+	case ERR_IMU_READ_GYRO_FAIL:
+	case ERR_BARO_READ_PRESSURE_FAIL:
+	case ERR_MISC_ERR:
+	case ERR_LOGIC_FAIL:
+		return false;
+	default:
+		return true;
+	}
+}
+
+void tlog(MessageCode_t code, const char *msg)
+{
 	LogPacket_t packet;
+
+	if (!is_high_priority(code)
+			&& (last_log_time[code + 128] != 0)
+			&& (HAL_GetTick() - last_log_time[code + 128] < LOG_INTERVAL_MS))
+
+	last_log_time[code + 128] = HAL_GetTick();
 
 	packet.code = code;
 	packet.message = NULL;
 	packet.message_len = 0;
 
-#ifdef DEBUG
+#ifdef TLOG_DEBUG
 	packet.message = msg;
-	packet.message_len = (uint8_t) strnlen(msg, MAX_LOG_MESSAGE_LEN);
+	packet.message_len = (u8)strnlen(msg, MAX_LOG_MESSAGE_LEN);
 #endif
 
-	subghz_send_log_packet(packet);
+	radio_send_log_packet(packet);
 
 #ifdef ENABLE_SERIAL_LOG
     printf("[LOG] %s | Code: 0x%02X | %s\n",
     	   (code > 0) ? "INFO" : "ERROR",
-           (uint8_t)((int8_t)code),
+           (u8)((s8)code),
            msg ? msg : "");
 #endif
 }
