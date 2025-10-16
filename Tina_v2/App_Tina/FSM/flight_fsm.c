@@ -129,9 +129,6 @@ void flight_fsm_update_sensors(
     fsm->sensor_data.vertical_velocity += (fsm->sensor_data.altitude - fsm->prev_altitude) / dt;
     fsm->sensor_data.timestamp_ms = current_timestamp_ms;
 
-    return;
-
-
 }
 
 // Main FSM update function

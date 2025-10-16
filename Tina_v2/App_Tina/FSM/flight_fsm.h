@@ -77,8 +77,7 @@ typedef struct {
 // Init and update
 MessageCode_t flight_fsm_init(FlightFSM_t *fsm);
 void flight_fsm_update_sensors(FlightFSM_t *fsm, float accel_x, float accel_y,
-                                float accel_z, float altitude,
-                                float temperature, float pressure);
+                                float accel_z, float temperature, float pressure);
 void flight_fsm_update(FlightFSM_t *fsm);
 
 // State info
