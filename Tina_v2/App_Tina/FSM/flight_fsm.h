@@ -70,6 +70,8 @@ typedef struct {
 
     float ground_altitude_m;
     bool ground_altitude_set;
+
+    float ground_pressure_pa;
 } FlightFSM_t;
 
 // Init and update

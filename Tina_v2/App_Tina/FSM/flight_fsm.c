@@ -83,7 +83,6 @@ void flight_fsm_update_sensors(
     float accel_x, 
     float accel_y,
     float accel_z, 
-    float altitude,
     float temperature, 
     float pressure) 
 {
@@ -95,6 +94,44 @@ void flight_fsm_update_sensors(
         5. update previous altitude and time for next calculation
     */
 
+    int current_timestamp_ms = HAL_GetTick();
+
+    if (!fsm) {
+        return;
+    }
+
+    fsm->prev_prev_altitude = fsm->prev_altitude;
+    fsm->prev_altitude = fsm->sensor_data.altitude;
+
+    fsm->sensor_data.accel_x = accel_x;
+    fsm->sensor_data.accel_y = accel_y;
+    fsm->sensor_data.accel_z = accel_z;
+    fsm->sensor_data.temperature = temperature;
+    fsm->sensor_data.pressure = pressure;
+    
+    fsm->sensor_data.accel_magnitude = sqrtf(
+        pow(accel_x, 2) + 
+        pow(accel_y, 2) + 
+        pow(accel_z, 2)
+    );
+
+    fsm->sensor_data.altitude = calculate_altitude_from_pressure(
+        pressure, 
+        fsm->ground_pressure_pa
+    );
+
+    float dt = (current_timestamp_ms - fsm->sensor_data.timestamp_ms) / 1000.0f;
+
+    if (dt <= 0) {
+        dt = 0.01f; // Prevent division by zero, assume small time step
+    }
+
+    fsm->sensor_data.vertical_velocity += (fsm->sensor_data.altitude - fsm->prev_altitude) / dt;
+    fsm->sensor_data.timestamp_ms = current_timestamp_ms;
+
+    return;
+
+
 }
 
 // Main FSM update function
@@ -103,6 +140,13 @@ void flight_fsm_update(FlightFSM_t *fsm)
     if (!fsm) {
         return;
     }
+
+
+    // read data from sensor api and update fsm sensors. Ideally reading from api should be done inside update function
+
+    // flight_fsm_update_sensors(
+    //     fsm,
+    // );
     
     // Call appropriate state handler
     switch (fsm->current_state) {
@@ -153,6 +197,13 @@ void flight_fsm_preflight_handler(FlightFSM_t *fsm)
 void flight_fsm_powered_ascent_handler(FlightFSM_t *fsm) 
 {
     u32 current_time = HAL_GetTick();
+
+    if (fsm->sensor_data.accel_y > 3 * 981 || fsm->sensor_data.altitude > 1000) {
+        // Launch detected
+        transition_state(fsm, FLIGHT_STATE_POWERED_ASCENT);
+    }
+
+
     
     // Update max altitude and acceleration    
     // Check for apogee    
