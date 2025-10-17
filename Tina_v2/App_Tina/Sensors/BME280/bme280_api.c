@@ -67,13 +67,6 @@ BME280_Status_t BME280_Init(const BME280_HAL_t *hal)
         return BME280_ERROR_INIT;
     }
     
-    // Set sensor to normal mode with standard settings
-    result = bme280_set_power_mode(BME280_NORMAL_MODE);
-    if (result != SUCCESS) {
-        is_initialized = false;
-        return BME280_ERROR_INIT;
-    }
-    
     // Configure oversampling: temp x1, pressure x16, humidity x1
     result = bme280_set_oversamp_temperature(BME280_OVERSAMP_1X);
     if (result != SUCCESS) {
@@ -105,6 +98,13 @@ BME280_Status_t BME280_Init(const BME280_HAL_t *hal)
     if (result != SUCCESS) {
         is_initialized = false;
         return BME280_ERROR_CONFIG;
+    }
+	
+	// Set sensor to normal mode with standard settings
+    result = bme280_set_power_mode(BME280_NORMAL_MODE);
+    if (result != SUCCESS) {
+        is_initialized = false;
+        return BME280_ERROR_INIT;
     }
     
     is_initialized = true;
