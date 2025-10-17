@@ -32,7 +32,7 @@
 #include "packet.h"
 #include "types.h"
 
-#include "bme280_support.h"
+#include "bme280_api.h"
 #include "bno055_support.h"
 
 #include <stdio.h>
@@ -107,9 +107,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_Delay(1000);
 
-    if (BME280_Init()) {
-    	tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
-    }
+  if (BME280_Init(NULL) != BME280_OK) {
+      tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
+  }
+
 
     if (bno055_init_accgyro()) {
     	tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
@@ -122,7 +123,7 @@ int main(void)
 	char log_msg[
 				 MAX_LOG_MESSAGE_LEN];
 	struct bno055_accel_t bno055_accel;
-	float t, p, h;
+	float p;
 
 	arm_pyros();
 
@@ -135,8 +136,8 @@ int main(void)
 	    MX_SubGHz_Phy_Process();
 
 
-	if (BME280_ReadAll(&t, &p, &h) == 0) {
-		snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa, Temp: %d", (int)p, (int)t);
+	if (BME280_ReadPressure(&p) == 0) {
+		snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
 		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
 	} else {
 		tlog(ERR_BARO_FAIL, "BME280 read failed");
