@@ -140,7 +140,7 @@ int main(void)
 		snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
 		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
 	} else {
-		tlog(ERR_BARO_FAIL, "BME280 read failed");
+		tlog(BME280_ReadPressure(&p), "BME280 read failed");
 	}
 
 	HAL_Delay(100);
