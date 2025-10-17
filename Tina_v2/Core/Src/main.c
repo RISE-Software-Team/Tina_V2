@@ -134,18 +134,16 @@ int main(void)
   while (1)
   {
 	    MX_SubGHz_Phy_Process();
+    // Read pressure
+    BME280_Status_t bme_status = BME280_ReadPressure(&pressure_Pa);
+    if (bme_status == BME280_OK) {
+        snprintf(log_msg, sizeof(log_msg), "Pressure: %.1f hPa", pressure_Pa / 100.0f);
+        tlog(INFO_DEBUG, log_msg);
+    } else {
+        tlog(ERR_BARO_FAIL, "BME280 read failed");
+    }
 
-
-	if (BME280_ReadPressure(&p) == 0) {
-		snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa", (int)p);
-		tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-	} else {
-		tlog(BME280_ReadPressure(&p), "BME280 read failed");
-	}
-
-	HAL_Delay(100);
-
-
+    HAL_Delay(100);
 
 	if (bno055_read_accel_xyz(&bno055_accel) == 0) {
 		snprintf(log_msg, sizeof(log_msg), "Accel (x, y, z): (%d, %d, %d)", bno055_accel.x, bno055_accel.y, bno055_accel.z);
