@@ -67,6 +67,8 @@ typedef struct {
     // Simple altitude history for apogee detection
     float prev_altitude;
     float prev_prev_altitude;
+    int altitude_decrease_count;
+    int vertical_velocity_negative_count;
 
     float ground_altitude_m;
     bool ground_altitude_set;

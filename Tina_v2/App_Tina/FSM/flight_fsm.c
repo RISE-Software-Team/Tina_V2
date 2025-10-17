@@ -94,7 +94,7 @@ void flight_fsm_update_sensors(
         5. update previous altitude and time for next calculation
     */
 
-    int current_timestamp_ms = HAL_GetTick();
+    u32 current_timestamp_ms = HAL_GetTick();
 
     if (!fsm) {
         return;
@@ -108,7 +108,7 @@ void flight_fsm_update_sensors(
     fsm->sensor_data.accel_z = accel_z;
     fsm->sensor_data.temperature = temperature;
     fsm->sensor_data.pressure = pressure;
-    
+
     fsm->sensor_data.accel_magnitude = sqrtf(
         pow(accel_x, 2) + 
         pow(accel_y, 2) + 
@@ -120,7 +120,7 @@ void flight_fsm_update_sensors(
         fsm->ground_pressure_pa
     );
 
-    float dt = (current_timestamp_ms - fsm->sensor_data.timestamp_ms) / 1000.0f;
+    u32 dt = (current_timestamp_ms - fsm->sensor_data.timestamp_ms) / 1000.0f;
 
     if (dt <= 0) {
         dt = 0.01f; // Prevent division by zero, assume small time step
@@ -128,6 +128,14 @@ void flight_fsm_update_sensors(
 
     fsm->sensor_data.vertical_velocity += (fsm->sensor_data.altitude - fsm->prev_altitude) / dt;
     fsm->sensor_data.timestamp_ms = current_timestamp_ms;
+
+    if (fsm->flight_log.max_altitude_m < fsm->sensor_data.altitude) {
+        fsm->flight_log.max_altitude_m = fsm->sensor_data.altitude;
+    }
+
+    if (fsm->flight_log.max_acceleration_g < fsm->sensor_data.accel_magnitude) {
+        fsm->flight_log.max_acceleration_g = fsm->sensor_data.accel_magnitude;
+    }
 
 }
 
@@ -188,23 +196,64 @@ void flight_fsm_preflight_handler(FlightFSM_t *fsm)
     // Check for preflight timeout
     // Set ground altitude reference on first valid reading
     // check for launch detection
+
+    /* 
+        1. if fsm null return
+        2. verify imu and barometer comms -> no need to check for comms since thats the first thing checked in main.c
+        3. Verify LoRa telemetry link is operational -> same as above
+        4. perform sensor checks -> same as above
+        5. Report system status to telemetry
+        6. If launch detected, transition to PoweredAscent
+
+        Launch Detection Criteria:
+            Acceleration > +3g 
+            OR 
+            Altitude > 10m
+    */
+
+    if (!fsm) {
+        return;
+    }
+
 }
 
 // PoweredAscent state handler
 void flight_fsm_powered_ascent_handler(FlightFSM_t *fsm) 
 {
+
+    /*
+        1. Increase telemetry rate and send data to ground station
+        2. Check for apogee detection
+        3. Update max altitude and acceleration
+        4. Safety timeout check (e.g. if powered ascent lasts too long without apogee change state to next state)
+    */
     u32 current_time = HAL_GetTick();
 
-    if (fsm->sensor_data.accel_y > 3 * 981 || fsm->sensor_data.altitude > 1000) {
-        // Launch detected
-        transition_state(fsm, FLIGHT_STATE_POWERED_ASCENT);
+    if (fsm->sensor_data.altitude < fsm->flight_log.max_altitude_m) {
+        fsm->altitude_decrease_count++;
+    } else {
+        fsm->altitude_decrease_count = 0;
     }
 
+    if (fsm->sensor_data.vertical_velocity - APOGEE_VELOCITY_EPSILON < 0) {
+        fsm->vertical_velocity_negative_count++;
+    } else {
+        fsm->vertical_velocity_negative_count = 0;
+    }
 
-    
-    // Update max altitude and acceleration    
-    // Check for apogee    
-    // Safety timeout check
+    if (
+        fsm->altitude_decrease_count >= APOGEE_SAMPLE_COUNT ||
+        fsm->vertical_velocity_negative_count >= APOGEE_SAMPLE_COUNT ||
+        current_time - fsm->flight_log.launch_time_ms > APOGEE_TIMEOUT_MS
+    ) {
+        fsm->flight_log.apogee_time_ms = current_time;
+        transition_state(fsm, FLIGHT_STATE_DROGUE_DESCENT);
+        
+        // TO DO: Fire drogue parachute
+    }
+
+    // TODO: SEND TELEMETRY
+
 }
 
 // DrogueDescent state handler
