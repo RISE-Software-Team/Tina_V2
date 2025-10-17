@@ -159,10 +159,10 @@ int main(void)
 		tlog(ERR_IMU_FAIL, "BNO055 read failed");
 	}
 
-	if (HAL_I2C_GetError(&hi2c2) != HAL_OK) {
-	    HAL_I2C_DeInit(&hi2c2);
-	    HAL_I2C_Init(&hi2c2);
-	    tlog(ERR_IMU_FAIL, "I2C LINE HAD TO BE RESET");
+	if (HAL_I2C_GetError(&hi2c2) != HAL_I2C_ERROR_NONE) {
+		HAL_I2C_DeInit(&hi2c2);
+		HAL_I2C_Init(&hi2c2);
+		tlog(ERR_DEBUG, "I2C bus reset");
 	}
 	HAL_Delay(100);
 
