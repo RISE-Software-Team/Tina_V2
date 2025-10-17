@@ -105,27 +105,33 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-	HAL_Delay(1000);
+  HAL_Delay(1000);
 
-  if (BME280_Init(NULL) != BME280_OK) {
-      tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
+  // Declare variables first (C89/C90 requirement)
+  char log_msg[MAX_LOG_MESSAGE_LEN];
+  struct bno055_accel_t bno055_accel;
+  float pressure_Pa;
+
+  // Initialize BME280
+  BME280_Status_t bme_init_status = BME280_Init(NULL);
+  if (bme_init_status != BME280_OK) {
+      snprintf(log_msg, sizeof(log_msg), "BME280: %s", BME280_GetErrorString(bme_init_status));
+      tlog(ERR_BARO_INIT_FAIL, log_msg);
+  } else {
+      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "BME280 initialized");
   }
 
+  // Initialize BNO055
+  if (bno055_init_accgyro()) {
+      tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
+  } else {
+      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "BNO055 initialized");
+  }
 
-    if (bno055_init_accgyro()) {
-    	tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
-    }
-	HAL_Delay(1000);
+  HAL_Delay(1000);
 
-    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
-    HAL_Delay(1000);
-
-	char log_msg[
-				 MAX_LOG_MESSAGE_LEN];
-	struct bno055_accel_t bno055_accel;
-	float p;
-
-	arm_pyros();
+  // Arm pyro channels
+  arm_pyros();
 
   /* USER CODE END 2 */
 
@@ -137,10 +143,11 @@ int main(void)
     // Read pressure
     BME280_Status_t bme_status = BME280_ReadPressure(&pressure_Pa);
     if (bme_status == BME280_OK) {
-        snprintf(log_msg, sizeof(log_msg), "Pressure: %.1f hPa", pressure_Pa / 100.0f);
+        snprintf(log_msg, sizeof(log_msg), "P: %.1f hPa", pressure_Pa / 100.0f);
         tlog(INFO_DEBUG, log_msg);
     } else {
-        tlog(ERR_BARO_FAIL, "BME280 read failed");
+        snprintf(log_msg, sizeof(log_msg), "BME280: %s", BME280_GetErrorString(bme_status));
+        tlog(ERR_BARO_FAIL, log_msg);
     }
 
     HAL_Delay(100);

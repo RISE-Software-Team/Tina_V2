@@ -35,6 +35,29 @@ typedef struct {
     void (*delay_ms)(u32 msek);
 } BME280_HAL_t;
 
+// Error message strings
+static inline const char* BME280_GetErrorString(BME280_Status_t status) {
+    switch(status) {
+        case BME280_OK:
+            return "OK";
+        case BME280_ERROR_INIT:
+            return "Initialization failed - sensor not responding";
+        case BME280_ERROR_CONFIG:
+            return "Configuration failed - invalid settings";
+        case BME280_ERROR_COMM:
+            return "Communication error - I2C read/write failed";
+        case BME280_ERROR_INVALID_PARAM:
+            return "Invalid parameter - NULL pointer";
+        case BME280_ERROR_NOT_INITIALIZED:
+            return "Not initialized - call BME280_Init() first";
+        case BME280_ERROR_TIMEOUT:
+            return "Timeout - sensor not ready";
+        default:
+            return "Unknown error";
+    }
+}
+
+// Function prototypes
 BME280_Status_t BME280_Init(const BME280_HAL_t *hal);
 BME280_Status_t BME280_DeInit(void);
 BME280_Status_t BME280_ReadPressure(float *pressure_Pa);
