@@ -1,8 +1,9 @@
 # STM32CubeIDE project folders
-*/.settings/
-*/.metadata/
-*/Debug/
-*/Release/
+.settings/
+.metadata/
+Debug/
+Release/
+Backup/
 
 # Object and build files
 *.d
