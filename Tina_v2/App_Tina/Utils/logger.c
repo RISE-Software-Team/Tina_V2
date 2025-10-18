@@ -37,6 +37,7 @@ void tlog(MessageCode_t code, const char *msg)
 	if (!is_high_priority(code)
 			&& (last_log_time[code + 128] != 0)
 			&& (HAL_GetTick() - last_log_time[code + 128] < LOG_INTERVAL_MS))
+		return;
 
 	last_log_time[code + 128] = HAL_GetTick();
 
