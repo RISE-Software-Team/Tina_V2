@@ -57,7 +57,6 @@ static s8 BNO055_I2C_routine(void)
 /* -------------------------------------------------------------------------- */
 static s8 hw_init(void)
 {
-    HAL_Delay(700);
     BNO055_I2C_routine();
     s8 rslt = bno055_init(&bno055);
     if (rslt != BNO055_SUCCESS) return rslt;

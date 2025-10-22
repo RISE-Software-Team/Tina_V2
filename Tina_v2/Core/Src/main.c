@@ -63,7 +63,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void CheckAndRecoverI2C(void);
+static void CheckAndRecoverI2C(void);
 
 /* USER CODE BEGIN PFP */
 
@@ -110,6 +110,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   BME280_RegisterDriver(NULL);
   BNO055_RegisterDriver(NULL);
+  HAL_Delay(700);
   if (BME280_Init()) tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
   
   if (BNO055_Init()) tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
