@@ -33,7 +33,7 @@
 #include "subghz_phy_app.h"
 #include "types.h"
 
-#include "bme280_support.h"
+#include "bme280_api.h"
 #include "bno055_support.h"
 
 #include <stdio.h>
