@@ -127,7 +127,7 @@ static s32 hw_init(void)
     if (rslt != 0) return rslt;
 
     bme280_set_oversamp_temperature(BME280_OVERSAMP_1X);
-    bme280_set_oversamp_pressure(BME280_OVERSAMP_1X);
+    bme280_set_oversamp_pressure(BME280_OVERSAMP_16X);
     bme280_set_oversamp_humidity(BME280_OVERSAMP_1X);
     bme280_set_power_mode(BME280_NORMAL_MODE);
 
