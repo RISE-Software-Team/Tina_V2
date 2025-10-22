@@ -1,3 +1,10 @@
+/*
+ * bme280_api.c
+ *
+ *  Created on: Oct 22, 2025
+ *      Author: pranavsuri4303
+ */
+
 #include "bme280_api.h"
 
 // Pointer to the currently registered driver (mock or hardware)

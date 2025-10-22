@@ -34,7 +34,7 @@
 #include "types.h"
 
 #include "bme280_api.h"
-#include "bno055_support.h"
+#include "bno055_api.h"
 
 #include <stdio.h>
 
@@ -63,6 +63,8 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void CheckAndRecoverI2C(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -106,18 +108,22 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-    if (BME280_Init())
-    	tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
-
-    if (bno055_init_accgyro())
-    	tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
-
-    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
+  BME280_RegisterDriver(NULL);
+  BNO055_RegisterDriver(NULL);
+  HAL_Delay(700);
+  if (BME280_Init()) tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
+  
+  if (BNO055_Init()) tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
+  
+  tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
 
 	char log_msg[
 				 MAX_LOG_MESSAGE_LEN];
-	struct bno055_accel_t bno055_accel;
+
 	float t, p, h;
+  BNO055_AccelData_t accel;
+  BNO055_GyroData_t gyro;
+  BNO055_EulerData_t euler;
 
 //	arm_pyros();
 
@@ -135,19 +141,30 @@ int main(void)
 		} else {
 			tlog(ERR_BARO_READ_PRESSURE_FAIL, "Baro read pressure failed");
 		}
+    if (BNO055_ReadAccel(&accel) == 0) {
+      snprintf(log_msg, sizeof(log_msg),
+              "Accel (x, y, z): (%.2f, %.2f, %.2f) m/s²",
+              accel.x, accel.y, accel.z);
+      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
+    } else {
+      tlog(ERR_IMU_READ_ACCEL_FAIL, "IMU accel read failed");
+    }
+      
+    if (BNO055_ReadGyro(&gyro) == 0) {
+      snprintf(log_msg, sizeof(log_msg),
+              "Gyro (x, y, z): (%.2f, %.2f, %.2f) °/s",
+              gyro.x, gyro.y, gyro.z);
+      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
+    }
 
-		if (bno055_read_accel_xyz(&bno055_accel) == 0) {
-			snprintf(log_msg, sizeof(log_msg), "Accel (x, y, z): (%d, %d, %d)", bno055_accel.x, bno055_accel.y, bno055_accel.z);
-			tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-		} else {
-			tlog(ERR_IMU_READ_ACCEL_FAIL, "IMU read accel failed");
-		}
-
-		if (HAL_I2C_GetError(&hi2c2) != HAL_OK) {
-			HAL_I2C_DeInit(&hi2c2);
-			HAL_I2C_Init(&hi2c2);
-			tlog(INFO_DEBUG, "I2C LINE HAD TO BE RESET");
-		}
+    if (BNO055_ReadEuler(&euler) == 0) {
+      snprintf(log_msg, sizeof(log_msg),
+              "Euler (heading, roll, pitch): (%.2f, %.2f, %.2f)°",
+              euler.heading, euler.roll, euler.pitch);
+      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
+    }
+    
+    CheckAndRecoverI2C();
 	/* USER CODE END WHILE */
 	/* USER CODE BEGIN 3 */
 	}
@@ -220,6 +237,17 @@ void Error_Handler(void)
   {
   }
   /* USER CODE END Error_Handler_Debug */
+}
+
+static void CheckAndRecoverI2C(void)
+{
+    if (HAL_I2C_GetError(&hi2c2) != HAL_OK) {
+        HAL_I2C_DeInit(&hi2c2);
+        HAL_I2C_Init(&hi2c2);
+        BNO055_Init();
+        BME280_Init();
+        tlog(INFO_DEBUG, "I2C RECOVERED + SENSORS REINIT");
+    }
 }
 
 #ifdef  USE_FULL_ASSERT
