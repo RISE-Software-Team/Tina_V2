@@ -9,14 +9,8 @@
 #define BNO055_API_H
 
 #include "bno055_api_types.h"
-#include "main.h"
 #include <stdint.h> 
-
-// --------------------------------------------------------
-// External dependencies
-// --------------------------------------------------------
-extern I2C_HandleTypeDef hi2c2;
-extern struct bno055_t bno055;
+#include <stddef.h>
 
 // --------------------------------------------------------
 // Driver interface (for mocking or hardware)
