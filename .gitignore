@@ -13,3 +13,4 @@ Backup/
 *.hex
 *.bin
 
+.vscode/
