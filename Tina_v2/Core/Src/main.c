@@ -63,6 +63,8 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void CheckAndRecoverI2C(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
