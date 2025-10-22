@@ -1,13 +1,9 @@
-#settings
-.settings/
-
-#metadata
-.metadata/
 # STM32CubeIDE project folders
-Tina_v2/.settings/
-Tina_v2/.metadata/
-Tina_v2/Debug/
-Tina_v2/Release/
+.settings/
+.metadata/
+Debug/
+Release/
+Backup/
 
 # Object and build files
 *.d

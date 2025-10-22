@@ -26,8 +26,8 @@
 
 /* USER CODE BEGIN Includes */
 #include "stm32_seq.h"
-#include "global_config.h"
 #include "stm32_timer.h"
+
 #include <stdio.h>
 
 /* USER CODE END Includes */
@@ -66,9 +66,6 @@ static RadioEvents_t RadioEvents;
 
 
 /* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-static void Subghz_ProcessQueue(void);
 
 /*!
  * @brief Function to be executed on Radio Tx Done event
@@ -110,14 +107,6 @@ void SubghzApp_Init(void)
 {
   /* USER CODE BEGIN SubghzApp_Init_1 */
 
-	  /* Radio initialization */
-	  RadioEvents.TxDone = OnTxDone;
-	  RadioEvents.RxDone = OnRxDone;
-	  RadioEvents.TxTimeout = OnTxTimeout;
-	  RadioEvents.RxTimeout = OnRxTimeout;
-	  RadioEvents.RxError = OnRxError;
-
-	  Radio.Init(&RadioEvents);
   /* USER CODE END SubghzApp_Init_1 */
 
   /* Radio initialization */
@@ -146,33 +135,15 @@ void SubghzApp_Init(void)
 	Radio.SetMaxPayloadLength(MODEM_LORA, MAX_PACKET_LENGTH);
 	Radio.SetPublicNetwork(false);
 
-//	memset(BufferTx, 0x0, MAX_PACKET_LENGTH);
 	memset(&txQueue, 0, sizeof(txQueue));
-
-
-
-
-	UTIL_SEQ_RegTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), UTIL_SEQ_RFU, Subghz_ProcessQueue);
-
-	UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
-
-
   /* USER CODE END SubghzApp_Init_2 */
 }
 
 /* USER CODE BEGIN EF */
 
-
-void SubghzApp_Process(void)
-{
-	// This function handles all radio event callbacks and state transitions.
-	// It MUST be called frequently from the main application loop.
-	Radio.IrqProcess();
-}
-
-static bool enqueue_packet(const TxQueueItem_t *packet) {
+static bool enqueue_packet(TxQueueItem_t packet) {
     if (txQueue.count >= TX_QUEUE_SIZE) return false;
-    txQueue.items[txQueue.tail] = *packet;
+    txQueue.items[txQueue.tail] = packet;
     txQueue.tail = (txQueue.tail + 1) % TX_QUEUE_SIZE; //we use modulus to make sure it wraps around
     txQueue.count++;
     return true;
@@ -185,7 +156,9 @@ static bool dequeue_packet(TxQueueItem_t *packet) {
     txQueue.count--;
     return true;
 }
-static void Subghz_ProcessQueue(void) {
+
+void radio_send_packet()
+{
     if (txBusy) return;
     if (txQueue.count == 0) return;
 
@@ -201,45 +174,29 @@ static void Subghz_ProcessQueue(void) {
     }
 }
 
-
-
-void subghz_send_telemetry_packet(const TelemetryPacket_t *telemetry_packet)
+void radio_send_telemetry_packet(TelemetryPacket_t telemetry)
 {
-	 if (!telemetry_packet) {
-	        tlog(ERR_MISC_ERR, "Log packet pointer NULL");
-	        return;
-	    }
+	TxQueueItem_t item;
 
-	    TxQueueItem_t packet_enqueue;
-	    packet_enqueue.type = PACKET_TYPE_TELEMETRY;
-	    packet_enqueue.data.telemetry = *telemetry_packet;
-	    packet_enqueue.length = packet_build_telemetry(packet_enqueue.payload, &packet_enqueue.data.telemetry);
+	item.length = packet_build_telemetry(item.payload, telemetry);
+	if(item.length == 0 || item.length > MAX_PACKET_LENGTH)
+		return;
 
-	    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_PACKET_LENGTH) return;
-
-	    enqueue_packet(&packet_enqueue);
+	enqueue_packet(item);
+	radio_send_packet();
 }
 
-void subghz_send_log_packet(const LogPacket_t *log_packet)
+void radio_send_log_packet(LogPacket_t log)
 {
-    if (!log_packet) {
-        tlog(ERR_MISC_ERR, "Log packet pointer NULL");
-        return;
-    }
+    TxQueueItem_t item;
 
-    TxQueueItem_t packet_enqueue;
-    packet_enqueue.type = PACKET_TYPE_LOG;
-    packet_enqueue.data.log = *log_packet;
-    packet_enqueue.length = packet_build_log(packet_enqueue.payload, &packet_enqueue.data.log);
+    item.length = packet_build_log(item.payload, log);
+    if(item.length == 0 || item.length > MAX_PACKET_LENGTH)
+    	return;
 
-    if(packet_enqueue.length == 0 || packet_enqueue.length > MAX_PACKET_LENGTH) return;
-
-    enqueue_packet(&packet_enqueue);
-
-
-
+    enqueue_packet(item);
+	radio_send_packet();
 }
-
 
 /* USER CODE END EF */
 
@@ -247,9 +204,7 @@ void subghz_send_log_packet(const LogPacket_t *log_packet)
 static void OnTxDone(void)
 {
   /* USER CODE BEGIN OnTxDone */
-	  txBusy = false;
-	  UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
-
+	txBusy = false;
   /* USER CODE END OnTxDone */
 }
 
@@ -262,8 +217,7 @@ static void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraS
 static void OnTxTimeout(void)
 {
   /* USER CODE BEGIN OnTxTimeout */
-	 txBusy = false;
-	 UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
+	txBusy = false;
   /* USER CODE END OnTxTimeout */
 }
 

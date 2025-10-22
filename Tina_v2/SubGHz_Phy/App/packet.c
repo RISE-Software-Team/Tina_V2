@@ -6,9 +6,12 @@
  */
 
 #include "packet.h"
+
 #include "main.h"
+#include "config.h"
+
 #include <string.h>
-#include "global_config.h"
+
 #define PACKET_HEADER 0xAA
 
 uint16_t seq_num = 0;
@@ -47,20 +50,20 @@ uint8_t packet_build_header(uint8_t *buffer){
     return idx;
 
 }
-uint8_t packet_build_telemetry(uint8_t *buffer, const TelemetryPacket_t *data) {
+uint8_t packet_build_telemetry(uint8_t *buffer, TelemetryPacket_t data) {
 
 	uint8_t idx = packet_build_header(buffer);
 
     buffer[idx++] = PACKET_TYPE_TELEMETRY;
-    pack_16(&buffer[idx], data->acc_x); idx += 2;
-    pack_16(&buffer[idx], data->acc_y); idx += 2;
-    pack_16(&buffer[idx], data->acc_z); idx += 2;
-    pack_16(&buffer[idx], data->gyro_x); idx += 2;
-    pack_16(&buffer[idx], data->gyro_y); idx += 2;
-    pack_16(&buffer[idx], data->gyro_z); idx += 2;
-    pack_16(&buffer[idx], data->altitude); idx += 4;
-    buffer[idx++] = data->event_flags;
-    buffer[idx++] = data->sys_state;
+    pack_16(&buffer[idx], data.acc_x); idx += 2;
+    pack_16(&buffer[idx], data.acc_y); idx += 2;
+    pack_16(&buffer[idx], data.acc_z); idx += 2;
+    pack_16(&buffer[idx], data.gyro_x); idx += 2;
+    pack_16(&buffer[idx], data.gyro_y); idx += 2;
+    pack_16(&buffer[idx], data.gyro_z); idx += 2;
+    pack_16(&buffer[idx], data.altitude); idx += 4;
+    buffer[idx++] = data.event_flags;
+    buffer[idx++] = data.sys_state;
     buffer[3] = idx+1; //accounting for the checksum
 
 
@@ -71,21 +74,21 @@ uint8_t packet_build_telemetry(uint8_t *buffer, const TelemetryPacket_t *data) {
     return idx;
 }
 
-uint8_t packet_build_log(uint8_t *buffer, const LogPacket_t *data)
+uint8_t packet_build_log(uint8_t *buffer, LogPacket_t data)
 {
     uint8_t idx = packet_build_header(buffer);
 
     buffer[idx++] = PACKET_TYPE_LOG;
-    buffer[idx++] = (uint8_t)((int8_t)data->code);
+    buffer[idx++] = (uint8_t)((int8_t)data.code);
 
-    uint8_t msg_len = data->message_len;
+    uint8_t msg_len = data.message_len;
     if (msg_len > MAX_LOG_MESSAGE_LEN) {
         msg_len = MAX_LOG_MESSAGE_LEN; //truncate if too big
     }
     buffer[idx++] = msg_len;
 
-    if (msg_len != 0 && data->message != NULL) {
-        memcpy(&buffer[idx], data->message, msg_len);
+    if (msg_len != 0 && data.message != NULL) {
+        memcpy(&buffer[idx], data.message, msg_len);
         idx += msg_len;
     }
 
@@ -95,7 +98,3 @@ uint8_t packet_build_log(uint8_t *buffer, const LogPacket_t *data)
 
     return idx;
 }
-
-
-
-

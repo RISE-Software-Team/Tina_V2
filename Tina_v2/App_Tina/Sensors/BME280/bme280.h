@@ -59,7 +59,7 @@
 #ifndef __BME280_H__
 #define __BME280_H__
 
-#ifndef TYPES_SUPPORT_H
+#ifndef TYPES_H
 /*!
 * @brief The following definition uses for define the data types
 *

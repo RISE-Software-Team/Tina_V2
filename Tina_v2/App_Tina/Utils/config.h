@@ -1,22 +1,20 @@
-#ifndef GLOBAL_CONFIG_H
-#define GLOBAL_CONFIG_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include "packet.h"
+#include <packet.h>
+
 //--- LOGGER ---
 
-#define DEBUG 1 // Radio used for debugging, allows for strings
+#define TLOG_DEBUG 1 // Radio used for debugging, allows for strings
 
-#define ENABLE_SERIAL_LOG   0 // // This used by logger to send serial data over uart pins
+//#define ENABLE_SERIAL_LOG 1 // This used by logger to send serial data over uart pins
 
+#define LOG_INTERVAL_MS 1000
 
-#if (DEBUG == 1)
-
+#ifdef TLOG_DEBUG
 #define MAX_PACKET_LENGTH 64
-
 #else
-
 #define MAX_PACKET_LENGTH 32
-
 #endif
 
 #define CRC_SIZE 1

@@ -1,6 +1,7 @@
-#ifndef TYPES_SUPPORT_H
-#define TYPES_SUPPORT_H
+#ifndef TYPES_H
+#define TYPES_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef int8_t   s8;

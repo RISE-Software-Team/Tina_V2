@@ -4,7 +4,7 @@ import time
 import re
 import binascii
 PORT = "/dev/ttyUSB0"
-BAUD = 9600
+BAUD = 115200
 
 PACKET_HEADER = 0xAA
 
@@ -14,28 +14,28 @@ MAX_MESSAGE_LEN       = 90
 
 # Mapping code values to strings
 MESSAGE_CODES = {
-    1:  "INFO_ENTERED_PREFLIGHT_STAGE",
-    2:  "INFO_ENTERED_POWERED_ASCENT_STAGE",
-    3:  "INFO_ENTERED_DROGUE_DESCENT_STAGE",
-    4:  "INFO_ENTERED_MAIN_DESCENT_STAGE",
-    5:  "INFO_ENTERED_TOUCHDOWN_STAGE",
-    6:  "INFO_DROGUE_PARACHUTE_DEPLOYED",
-    7:  "INFO_MAIN_PARACHUTE_DEPLOYED",
-    8:  "INFO_COMPONENT_SANITY_CHECK_PASS",
-    9:  "INFO_DEBUG",
-    -1: "ERR_IMU_FAIL",
+    0:  "TLOG_DEBUG",
+    1:  "INFO_COMPONENT_SANITY_CHECK_PASS",
+    2:  "INFO_ENTERED_PREFLIGHT_STAGE",
+    3:  "INFO_ENTERED_POWERED_ASCENT_STAGE",
+    4:  "INFO_ENTERED_DROGUE_DESCENT_STAGE",
+    5:  "INFO_ENTERED_MAIN_DESCENT_STAGE",
+    6:  "INFO_ENTERED_TOUCHDOWN_STAGE",
+    7:  "INFO_DROGUE_PARACHUTE_DEPLOYED",
+    8:  "INFO_MAIN_PARACHUTE_DEPLOYED",
+    -1: "ERR_COMPONENT_SANITY_CHECK_FAIL",
     -2: "ERR_IMU_INIT_FAIL",
     -3: "ERR_IMU_CALIB_FAIL",
-    -4: "ERR_BARO_FAIL",
-    -5: "ERR_BARO_INIT_FAIL",
-    -6: "ERR_BARO_CALIB_FAIL",
-    -7: "ERR_PYRO_DROGUE_FAIL",
-    -8: "ERR_PYRO_MAIN_FAIL",
-    -9: "ERR_TIMEOUT_APOGEE",
-    -10:"ERR_MISC_ERR",
-    -11:"ERR_LOGIC_FAIL",
-    -12:"ERR_COMPONENT_SANITY_CHECK_FAIL",
-    -13:"ERR_DEBUG",
+    -4: "ERR_IMU_READ_ACCEL_FAIL",
+    -5: "ERR_IMU_READ_GYRO_FAIL",
+    -6: "ERR_BARO_INIT_FAIL",
+    -7: "ERR_BARO_CALIB_FAIL",
+    -8: "ERR_BARO_READ_PRESSURE_FAIL",
+    -9: "ERR_PYRO_DROGUE_FAIL",
+    -10: "ERR_PYRO_MAIN_FAIL",
+    -11: "ERR_TIMEOUT_APOGEE",
+    -12:"ERR_MISC_ERR",
+    -13:"ERR_LOGIC_FAIL",
 }
 
 
@@ -132,6 +132,7 @@ def main():
     print("\nConfiguring module with AT commands...")
     send_at_command(ser, "AT")
     send_at_command(ser, "AT+MODE=TEST")
+    send_at_command(ser, "AT+TEST=RFCFG,868,7,500,8,12,14,ON,OFF,OFF")
     send_at_command(ser, "AT+TEST=RXLRPKT")
 
     print("\nModule configured. Listening for packets...\n")

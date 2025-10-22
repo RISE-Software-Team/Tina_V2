@@ -14,7 +14,7 @@
 
 typedef enum {
     PACKET_TYPE_TELEMETRY = 0x01,
-    PACKET_TYPE_LOG     = 0x02,
+    PACKET_TYPE_LOG       = 0x02,
 } PacketType_t;
 
 typedef struct {
@@ -40,7 +40,7 @@ typedef struct {
 } LogPacket_t;
 
 
-uint8_t packet_build_telemetry(uint8_t *buffer, const TelemetryPacket_t *data);
-uint8_t packet_build_log(uint8_t *buffer, const LogPacket_t *data);
+uint8_t packet_build_telemetry(uint8_t *buffer, TelemetryPacket_t data);
+uint8_t packet_build_log(uint8_t *buffer, LogPacket_t data);
 
 #endif // PACKET_H
