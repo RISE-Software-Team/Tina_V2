@@ -1,32 +1,92 @@
-#include "main.h"
-#include "bme280.h"
+#include "bme280_support.h"
 #include "logger.h"
 #include <stdio.h>
+
 #define BME280_API
 
 #ifdef BME280_API
 
-extern I2C_HandleTypeDef hi2c2; // assuming you use hi2c1
+/* -------------------------------------------------------------------------- */
+/* GLOBALS                                                                    */
+/* -------------------------------------------------------------------------- */
 
-/* Global sensor struct */
+extern I2C_HandleTypeDef hi2c2;
 struct bme280_t bme280;
 
-/* I2C function prototypes */
-s8 BME280_I2C_bus_write(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt);
-s8 BME280_I2C_bus_read(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt);
+/* -------------------------------------------------------------------------- */
+/* INTERNAL DRIVER STRUCT AND REGISTRATION                                    */
+/* -------------------------------------------------------------------------- */
 
-void BME280_delay_msek(u32 msek);
+/* Forward declarations for the default hardware driver */
+static s32 hw_init(void);
+static int hw_read_temperature(float *temp);
+static int hw_read_pressure(float *press);
+static int hw_read_humidity(float *hum);
+static int hw_read_all(float *temp, float *press, float *hum);
+static const BME280_Driver_t *registered_driver = NULL;
 
-s8 I2C_routine(void)
+/* Default hardware driver instance */
+static const BME280_Driver_t default_driver = {
+    .init = hw_init,
+    .read_temperature = hw_read_temperature,
+    .read_pressure = hw_read_pressure,
+    .read_humidity = hw_read_humidity,
+    .read_all = hw_read_all,
+};
+
+/* -------------------------------------------------------------------------- */
+/* DRIVER REGISTRATION / RETRIEVAL                                            */
+/* -------------------------------------------------------------------------- */
+
+void BME280_RegisterDriver(const BME280_Driver_t *driver)
 {
-    bme280.bus_write = BME280_I2C_bus_write;
-    bme280.bus_read  = BME280_I2C_bus_read;
-    bme280.dev_addr  = BME280_I2C_ADDRESS1;   // or ADDRESS2 depending on your wiring
-    bme280.delay_msec = BME280_delay_msek;
-    return BME280_INIT_VALUE;
+    registered_driver = (driver != NULL) ? driver : &default_driver;
 }
 
-s8 BME280_I2C_bus_write(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
+const BME280_Driver_t *BME280_GetRegisteredDriver(void)
+{
+    return registered_driver ? registered_driver : &default_driver;
+}
+
+/* -------------------------------------------------------------------------- */
+/* PUBLIC WRAPPERS (CALLABLE FROM FSM OR APP CODE)                            */
+/* -------------------------------------------------------------------------- */
+
+s32 BME280_Init(void)
+{
+    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
+    return drv->init ? drv->init() : -1;
+}
+
+int BME280_ReadTemperature(float *temp)
+{
+    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
+    return drv->read_temperature ? drv->read_temperature(temp) : -1;
+}
+
+int BME280_ReadPressure(float *press)
+{
+    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
+    return drv->read_pressure ? drv->read_pressure(press) : -1;
+}
+
+int BME280_ReadHumidity(float *hum)
+{
+    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
+    return drv->read_humidity ? drv->read_humidity(hum) : -1;
+}
+
+int BME280_ReadAll(float *temp, float *press, float *hum)
+{
+    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
+    return drv->read_all ? drv->read_all(temp, press, hum) : -1;
+}
+
+/* -------------------------------------------------------------------------- */
+/* LOW-LEVEL HARDWARE IMPLEMENTATION                                          */
+/* -------------------------------------------------------------------------- */
+
+static s8 BME280_I2C_bus_write(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
 {
     if (HAL_I2C_Mem_Write(&hi2c2, dev_addr << 1, reg_addr,
                           I2C_MEMADD_SIZE_8BIT, reg_data, cnt, 100) != HAL_OK)
@@ -34,7 +94,7 @@ s8 BME280_I2C_bus_write(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
     return 0;
 }
 
-s8 BME280_I2C_bus_read(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
+static s8 BME280_I2C_bus_read(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
 {
     if (HAL_I2C_Mem_Read(&hi2c2, dev_addr << 1, reg_addr,
                          I2C_MEMADD_SIZE_8BIT, reg_data, cnt, 100) != HAL_OK)
@@ -42,64 +102,63 @@ s8 BME280_I2C_bus_read(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
     return 0;
 }
 
-void BME280_delay_msek(u32 msek)
+static void BME280_delay_msek(u32 msek)
 {
     HAL_Delay(msek);
 }
 
-/* Simple initialization */
-s32 BME280_Init(void)
+/* -------------------------------------------------------------------------- */
+/* DEFAULT HARDWARE DRIVER IMPLEMENTATION                                     */
+/* -------------------------------------------------------------------------- */
+
+static s8 I2C_routine(void)
 {
-//    I2C_routine();
-//    return bme280_init(&bme280);
+    bme280.bus_write = BME280_I2C_bus_write;
+    bme280.bus_read  = BME280_I2C_bus_read;
+    bme280.dev_addr  = BME280_I2C_ADDRESS1;   /* or ADDRESS2 depending on wiring */
+    bme280.delay_msec = BME280_delay_msek;
+    return 0;
+}
+
+static s32 hw_init(void)
+{
     I2C_routine();
     s32 rslt = bme280_init(&bme280);
+    if (rslt != 0) return rslt;
 
     bme280_set_oversamp_temperature(BME280_OVERSAMP_1X);
     bme280_set_oversamp_pressure(BME280_OVERSAMP_1X);
     bme280_set_oversamp_humidity(BME280_OVERSAMP_1X);
-
     bme280_set_power_mode(BME280_NORMAL_MODE);
 
     return rslt;
 }
 
-/* Read temperature, pressure, humidity once */
-//void BME280_ReadAll(float *temp, float *press, float *hum)
-//{
-//    s32 uncomp_temp, uncomp_pres, uncomp_hum;
-//    bme280_read_uncomp_pressure_temperature_humidity(&uncomp_pres, &uncomp_temp, &uncomp_hum);
-//
-//    *temp = (float)bme280_compensate_temperature_int32(uncomp_temp) / 100.0f;
-//    *press = (float)bme280_compensate_pressure_int32(uncomp_pres) / 100.0f;
-//    *hum = (float)bme280_compensate_humidity_int32(uncomp_hum) / 1024.0f;
-//}
-#include "bme280_support.h"
-
-/* Read temperature, pressure, humidity once, returns 0 on success, nonzero on failure */
-int BME280_ReadAll(float *temp, float *press, float *hum)
+static int hw_read_all(float *temp, float *press, float *hum)
 {
     s32 uncomp_temp = 0, uncomp_pres = 0, uncomp_hum = 0;
-
-    BME280_RETURN_FUNCTION_TYPE status =
-        bme280_read_uncomp_pressure_temperature_humidity(&uncomp_pres, &uncomp_temp, &uncomp_hum);
-		char log_msg[64];
-
-//    	snprintf(log_msg, sizeof(log_msg), "uncomp_pres: %ld ", uncomp_pres);
-//    	tlog(ERR_BARO_CALIB_FAIL, log_msg);
-//
-//    	snprintf(log_msg, sizeof(log_msg), "status: %d ", status);
-//    	tlog(ERR_BARO_CALIB_FAIL, log_msg);
-
-    if (status == ERROR) {
+    if (bme280_read_uncomp_pressure_temperature_humidity(&uncomp_pres, &uncomp_temp, &uncomp_hum) != 0)
         return -1;
-    }
 
-    *temp  = (float)bme280_compensate_temperature_int32(uncomp_temp) / 100.0f;
-    *press = (float)bme280_compensate_pressure_int32(uncomp_pres) / 100.0f;
-    *hum   = (float)bme280_compensate_humidity_int32(uncomp_hum) / 1024.0f;
-
+    if (temp)  *temp  = (float)bme280_compensate_temperature_int32(uncomp_temp) / 100.0f;
+    if (press) *press = (float)bme280_compensate_pressure_int32(uncomp_pres) / 100.0f;
+    if (hum)   *hum   = (float)bme280_compensate_humidity_int32(uncomp_hum) / 1024.0f;
     return 0;
+}
+
+static int hw_read_temperature(float *temp)
+{
+    return hw_read_all(temp, NULL, NULL);
+}
+
+static int hw_read_pressure(float *press)
+{
+    return hw_read_all(NULL, press, NULL);
+}
+
+static int hw_read_humidity(float *hum)
+{
+    return hw_read_all(NULL, NULL, hum);
 }
 
 #endif

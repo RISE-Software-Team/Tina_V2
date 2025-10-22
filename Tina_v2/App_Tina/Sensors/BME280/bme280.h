@@ -481,7 +481,7 @@ BME280_BUS_RD_PARAM_TYPE to function calls used inside the API
 #define E_BME280_NULL_PTR       ((s8)-127)
 #define E_BME280_COMM_RES       ((s8)-1)
 #define E_BME280_OUT_OF_RANGE   ((s8)-2)
-#define ERROR					((s8)-1)
+#define BME280_ERROR			((s8)-1)
 #define BME280_CHIP_ID_READ_FAIL	((s8)-1)
 #define BME280_CHIP_ID_READ_SUCCESS	((u8)0)
 

@@ -19,38 +19,30 @@ extern I2C_HandleTypeDef hi2c2;
  */
 extern struct bme280_t bme280;
 
-// --- Public API Functions ---
+// -----------------------------------------------------------------------------
+// Driver interface for dependency injection / mocking
+// -----------------------------------------------------------------------------
 
-/**
- * @brief Initializes the BME280 sensor by setting up the I2C interface
- * and calling the core bme280_init function.
- * @return BME280_INIT_VALUE on success, or an error code from bme280_init.
- */
+typedef struct {
+    /**
+     * Initialize the sensor / driver.
+     * Return 0 on success or negative error code.
+     */
+    s32 (*init)(void);
+    int (*read_temperature)(float *temp);
+    int (*read_pressure)(float *press);
+    int (*read_humidity)(float *hum);
+    int (*read_all)(float *temp, float *press, float *hum);
+} BME280_Driver_t;
+
+void BME280_RegisterDriver(const BME280_Driver_t *driver);
+const BME280_Driver_t *BME280_GetRegisteredDriver(void);
+
 s32 BME280_Init(void);
 
-/**
- * @brief Reads compensated temperature, pressure, and humidity values from the sensor.
- * @param temp Pointer to store the temperature in degrees Celsius (float).
- * @param press Pointer to store the pressure in Pa (float).
- * @param hum Pointer to store the humidity in %RH (float).
- */
+int BME280_ReadTemperature(float *temp);
+int BME280_ReadPressure(float *press);
+int BME280_ReadHumidity(float *hum);
 int BME280_ReadAll(float *temp, float *press, float *hum);
-
-// --- Private Driver Functions (Declared for Linkage/External Driver Use) ---
-
-/**
- * @brief I2C bus write function conforming to the BME280 driver interface.
- */
-s8 BME280_I2C_bus_write(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt);
-
-/**
- * @brief I2C bus read function conforming to the BME280 driver interface.
- */
-s8 BME280_I2C_bus_read(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt);
-
-/**
- * @brief Delay function conforming to the BME280 driver interface.
- */
-void BME280_delay_msek(u32 msek);
 
 #endif /* BME280_SUPPORT_H */
