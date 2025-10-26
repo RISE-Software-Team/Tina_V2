@@ -11,25 +11,25 @@
 static const BME280_Driver_t *registered_driver = NULL;
 
 // Default hardware driver (defined in bme280_hw_driver.c)
-extern const BME280_Driver_t default_driver;
+extern const BME280_Driver_t bme280_default_driver;
 
 /* -------------------------------------------------------------------------- */
 /* Driver registration and retrieval                                          */
 /* -------------------------------------------------------------------------- */
 void BME280_RegisterDriver(const BME280_Driver_t *driver)
 {
-    registered_driver = (driver != NULL) ? driver : &default_driver;
+    registered_driver = (driver != NULL) ? driver : &bme280_default_driver;
 }
 
 const BME280_Driver_t *BME280_GetRegisteredDriver(void)
 {
-    return registered_driver ? registered_driver : &default_driver;
+    return registered_driver ? registered_driver : &bme280_default_driver;
 }
 
 /* -------------------------------------------------------------------------- */
 /* Public wrapper API (calls into registered driver)                          */
 /* -------------------------------------------------------------------------- */
-s32 BME280_Init(void)
+int32_t BME280_Init(void)
 {
     const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
     return drv->init ? drv->init() : -1;
