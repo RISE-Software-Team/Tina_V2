@@ -58,20 +58,23 @@ static s8 BNO055_I2C_routine(void)
 static s8 hw_init(void)
 {
     BNO055_I2C_routine();
-    s8 rslt = bno055_init(&bno055);
-    if (rslt != BNO055_SUCCESS) return rslt;
 
-    bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
-    bno055_set_operation_mode(BNO055_OPERATION_MODE_CONFIG);
-    HAL_Delay(25);
-    bno055_set_operation_mode(BNO055_OPERATION_MODE_ACCGYRO);
-    HAL_Delay(25);
-    bno055_set_accel_range(BNO055_ACCEL_RANGE_8G);
-    bno055_set_accel_bw(BNO055_ACCEL_BW_250HZ);
-    bno055_set_gyro_range(BNO055_GYRO_RANGE_2000DPS);
-    bno055_set_gyro_bw(BNO055_GYRO_BW_32HZ);
+    s8 rslt;
 
-    return rslt;
+    rslt = bno055_init(&bno055);
+    if (rslt != BNO055_SUCCESS)
+    	return rslt;
+
+
+    rslt = bno055_set_accel_range(BNO055_ACCEL_RANGE_8G);
+    if (rslt != BNO055_SUCCESS)
+    	return rslt;
+
+    rslt = bno055_set_gyro_range(BNO055_GYRO_RANGE_2000DPS);
+    if (rslt != BNO055_SUCCESS)
+    	return rslt;
+
+    return bno055_set_operation_mode(BNO055_OPERATION_MODE_ACCGYRO);
 }
 
 /* -------------------------------------------------------------------------- */
