@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
 #include "host_includes.h"
 #include "main.h"
 #include "../Sensors/BME280/bme280_api.h"
@@ -19,11 +21,15 @@ int main(void) {
     }
 
     float t=0, p=0, h=0;
-    if (BME280_ReadAll(&t, &p, &h) == 0) {
-        printf("Temperature: %.2f C, Pressure: %.2f hPa, Humidity: %.2f %%\n", t, p, h);
-    } else {
-        printf("BME280_ReadAll failed\n");
-        return 2;
+    for (int i = 0; i < 5; i++) {
+        if (BME280_ReadAll(&t, &p, &h) == 0) {
+            printf("Temperature: %.2f C, Pressure: %.2f hPa, Humidity: %.2f %%\n", t, p, h);
+        } else {
+            printf("BME280_ReadAll failed\n");
+            return -1;
+        }
+
+        sleep(1); // Sleep 1 second between readings
     }
 
     return 0;

@@ -1,14 +1,30 @@
+#include <stdlib.h>
+
 #include "bme280_api.h"
 #include "main.h"
 
 /* -------------------------------------------------------------------------- */
-/* Mock-level operations                                                  */
+/* Mock-level operations                                                      */
 /* -------------------------------------------------------------------------- */
 static s32 mock_init(void);
 static int mock_read_all(float *temp, float *press, float *hum);
 static int mock_read_temperature(float *temp);
 static int mock_read_pressure(float *press);
 static int mock_read_humidity(float *hum);
+
+/* -------------------------------------------------------------------------- */
+/* Base Values                                                                */
+/* -------------------------------------------------------------------------- */
+static float BASE_TEMP  = 25.0f;
+static float BASE_PRESS = 1000.0f;
+static float BASE_HUM   = 50.0f;
+
+static float add_random_noise(float base, float range)
+{
+    // range = ±range (so range=1 gives random change between -1 and +1)
+    float noise = ((float)(rand() % 2001) / 1000.0f - 1.0f) * range;
+    return base + noise;
+}
 
 /* -------------------------------------------------------------------------- */
 /* Mock hardware driver instance                                           */
@@ -23,21 +39,21 @@ const BME280_Driver_t mock_driver = {
 
 static s32 mock_init(void) {
     /* Mock initialization logic */
-    return BME280_OK;
+    return 0;
 }
 
 static int mock_read_temperature(float *temp) {
-    *temp = 25.0; // Mock temperature value
+    *temp = add_random_noise(BASE_TEMP, 1.0f);
     return 0;
 }
 
 static int mock_read_pressure(float *press) {
-    *press = 1013.25; // Mock pressure value
+    *press = add_random_noise(BASE_PRESS, 1.0f);
     return 0;
 }
 
 static int mock_read_humidity(float *hum) {
-    *hum = 40.0; // Mock humidity value
+    *hum = add_random_noise(BASE_HUM, 1.0f);
     return 0;
 }
 
