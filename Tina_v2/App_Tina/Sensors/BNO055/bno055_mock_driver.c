@@ -54,8 +54,8 @@ static s8 mock_init(void)
 /* -------------------------------------------------------------------------- */
 static int mock_read_accel(BNO055_AccelData_t *accel)
 {
-    accel->x = add_random_noise(BASE_ACCL_X, 0.1f);
-    accel->y = add_random_noise(BASE_ACCL_Y, 0.1f);
+    accel->x = add_random_noise(BASE_ACCL_X, 0.01f);
+    accel->y = add_random_noise(BASE_ACCL_Y, 0.01f);
     accel->z = add_random_noise(BASE_ACCL_Z, 0.5f);
     return 0;
 }
@@ -72,8 +72,8 @@ static int mock_read_gyro(BNO055_GyroData_t *gyro)
 static int mock_read_euler(BNO055_EulerData_t *euler)
 {
     // Simulate a flat orientation, slightly tilted
-    euler->heading = add_random_noise(BASE_EULER_H, 0.1f);
-    euler->roll    = add_random_noise(BASE_EULER_R, 0.1f);
-    euler->pitch   = add_random_noise(BASE_EULER_P, 0.1f);
+    euler->heading = add_random_noise(BASE_EULER_H, 0.01f);
+    euler->roll    = add_random_noise(BASE_EULER_R, 0.01f);
+    euler->pitch   = add_random_noise(BASE_EULER_P, 0.01f);
     return 0;
 }
