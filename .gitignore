@@ -15,3 +15,6 @@ Backup/
 
 # VSCode
 .vscode/
+
+# Build output
+Tina_v2/App_Tina/Test/*_test
