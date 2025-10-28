@@ -12,6 +12,26 @@ static int mock_read_gyro(BNO055_GyroData_t *gyro);
 static int mock_read_euler(BNO055_EulerData_t *euler);
 
 /* -------------------------------------------------------------------------- */
+/* Base Values                                                                */
+/* -------------------------------------------------------------------------- */
+static float BASE_ACCL_X  = 0.05f;
+static float BASE_ACCL_Y  = 0.03f;
+static float BASE_ACCL_Z  = -9.81;
+static float BASE_GYRO_X  = 0.0f;
+static float BASE_GYRO_Y  = 0.0f;
+static float BASE_GYRO_Z  = 0.0f;
+static float BASE_EULER_H = 0.0f;
+static float BASE_EULER_R = 0.0f;
+static float BASE_EULER_P = 0.0f;
+
+static float add_random_noise(float base, float range)
+{
+    // range = ±range (so range=1 gives random change between -1 and +1)
+    float noise = ((float)(rand() % 2001) / 1000.0f - 1.0f) * range;
+    return base + noise;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Default hardware driver instance                                           */
 /* -------------------------------------------------------------------------- */
 const BNO055_Driver_t bno055_default_driver = {
@@ -34,27 +54,26 @@ static s8 mock_init(void)
 /* -------------------------------------------------------------------------- */
 static int mock_read_accel(BNO055_AccelData_t *accel)
 {
-    // Simulate small random noise around 0, 0, +9.81 m/s^2 (gravity)
-    accel->x = 0.05f;     // Small horizontal noise
-    accel->y = -0.03f;    // Small horizontal noise
-    accel->z = 9.81f;     // Gravity acting on Z-axis (stationary upright)
+    accel->x = add_random_noise(BASE_ACCL_X, 0.1f);
+    accel->y = add_random_noise(BASE_ACCL_Y, 0.1f);
+    accel->z = add_random_noise(BASE_ACCL_Z, 0.5f);
     return 0;
 }
 
 static int mock_read_gyro(BNO055_GyroData_t *gyro)
 {
     // Simulate a stationary sensor: near-zero angular velocity
-    gyro->x = 0.01f;  // degrees/sec
-    gyro->y = -0.02f;
-    gyro->z = 0.00f;
+    gyro->x = add_random_noise(BASE_GYRO_X, 0.01f);
+    gyro->y = add_random_noise(BASE_GYRO_Y, 0.01f);
+    gyro->z = add_random_noise(BASE_GYRO_Z, 0.01f);
     return 0;
 }
 
 static int mock_read_euler(BNO055_EulerData_t *euler)
 {
     // Simulate a flat orientation, slightly tilted
-    euler->heading = 0.0f;   // Facing North (arbitrary)
-    euler->roll    = 1.5f;   // Slight roll to the right (degrees)
-    euler->pitch   = -0.8f;  // Slight nose down (degrees)
+    euler->heading = add_random_noise(BASE_EULER_H, 0.1f);
+    euler->roll    = add_random_noise(BASE_EULER_R, 0.1f);
+    euler->pitch   = add_random_noise(BASE_EULER_P, 0.1f);
     return 0;
 }
