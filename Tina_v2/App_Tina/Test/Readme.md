@@ -59,7 +59,3 @@ Accel: x=0.057 m/s^2, y=0.025, z=-9.770
 Gyro: x=-0.008 deg/s, y=-0.001, z=0.001
 Euler: heading=-0.000 deg, roll=-0.001 deg, pitch=0.000 deg
 ```
-
-Notes
-
-- The tests use small shim headers (`host_includes.h`, `main.h`) in each test directory so they compile with a standard host toolchain.
