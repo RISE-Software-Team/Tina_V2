@@ -199,7 +199,7 @@
 						</tool>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="Sensors/BME280/bme280_mock_driver.c|Test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="App_Tina"/>
+						<entry excluding="Sensors/BNO055/bno055_mock_driver.c|Sensors/BME280/bme280_mock_driver.c|Test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="App_Tina"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
