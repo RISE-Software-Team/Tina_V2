@@ -4,7 +4,6 @@
  *  Created on: Oct 13, 2025
  *      Author: krissal1234
  */
-
 #include "main.h"
 #include "pyro_manager.h"
 #include <stdio.h>
