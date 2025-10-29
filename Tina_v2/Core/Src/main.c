@@ -23,14 +23,16 @@
 #include "app_subghz_phy.h"
 #include "usart.h"
 #include "gpio.h"
-#include "pyro_manager.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "config.h"
 #include "logger.h"
 #include "packet.h"
+#include "pyro_manager.h"
+#include "sensor.h"
 #include "subghz_phy_app.h"
+#include "telemetry.h"
 #include "types.h"
 
 #include "bme280_api.h"
@@ -111,70 +113,48 @@ int main(void)
   BME280_RegisterDriver(NULL);
   BNO055_RegisterDriver(NULL);
 
+  bool sanity_check_passed = true;
+
   HAL_Delay(1000);
 
-  if (BME280_Init()) tlog(ERR_BARO_INIT_FAIL, "BME280 init failed");
-  
-  if (BNO055_Init()) tlog(ERR_IMU_INIT_FAIL, "BNO055 init failed");
-  
+  if (BME280_Init()) {
+    sanity_check_passed = false;
+    tlog(ERR_BARO_INIT_FAIL, "Baro init failed");
+  }
+
   HAL_Delay(1000);
 
-  tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
+  if (BNO055_Init()) {
+    sanity_check_passed = false;
+    tlog(ERR_IMU_INIT_FAIL, "IMU init failed");
+  }
 
-	char log_msg[
-				 MAX_LOG_MESSAGE_LEN];
+  HAL_Delay(1000);
 
-	float t, p, h;
-  BNO055_AccelData_t accel;
-  BNO055_GyroData_t gyro;
-  BNO055_EulerData_t euler;
+  if (sanity_check_passed) {
+    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
+  } else {
+    tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, "Components sanity check failed");
+  }
+
+  SensorData_t sensor_data = {0};
 
 //	arm_pyros();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		radio_send_packet();
+    radio_send_packet();
 
-		if (BME280_ReadAll(&t, &p, &h) == 0) {
-			snprintf(log_msg, sizeof(log_msg), "Pressure: %d hPa, Temp: %d", (int)p, (int)t);
-			tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-		} else {
-			tlog(ERR_BARO_READ_PRESSURE_FAIL, "Baro read pressure failed");
-		}
-    if (BNO055_ReadAccel(&accel) == 0) {
-      snprintf(log_msg, sizeof(log_msg),
-              "Accel (x, y, z): (%.2f, %.2f, %.2f) m/s²",
-              accel.x, accel.y, accel.z);
-      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-    } else {
-      tlog(ERR_IMU_READ_ACCEL_FAIL, "IMU accel read failed");
-    }
-      
-    if (BNO055_ReadGyro(&gyro) == 0) {
-      snprintf(log_msg, sizeof(log_msg),
-              "Gyro (x, y, z): (%.2f, %.2f, %.2f) °/s",
-              gyro.x, gyro.y, gyro.z);
-      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-    }
+    sensors_read_all(&sensor_data);
 
-    if (BNO055_ReadEuler(&euler) == 0) {
-      snprintf(log_msg, sizeof(log_msg),
-              "Euler (heading, roll, pitch): (%.2f, %.2f, %.2f)°",
-              euler.heading, euler.roll, euler.pitch);
-      tlog(INFO_COMPONENT_SANITY_CHECK_PASS, log_msg);
-    }
-    
+    if (telemetry_send(sensor_data, 0))
+      tlog(ERR_TELEMETRY_SEND_FAIL, "Telemetry send failed");
+
     CheckAndRecoverI2C();
-	/* USER CODE END WHILE */
-	/* USER CODE BEGIN 3 */
 	}
 }
-  /* USER CODE END 3 */
-
 
 /**
   * @brief System Clock Configuration
