@@ -12,7 +12,8 @@ How to run locally
 Build and run the BME280 test:
 
 ```bash
-gcc -std=c99 -I.. -I../Sensors/BME280 -o bme280_test test_bme280.c ../Sensors/BME280/bme280_mock_driver.c -w
+gcc -o bme280_test test_bme280.c ../Sensors/BME280/bme280_mock_driver.c ../Sensor│(Tina_V2) ➜  Tina_V2 git:(sim) ✗ g
+s/BME280/bme280_api.c -lzmq -w
 ```
 Sample output:
 ```bash

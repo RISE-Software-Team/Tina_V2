@@ -1,32 +1,33 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-#include "../Sensors/BME280/bme280_api.c"
-
+#include <unistd.h>
+#include "../Sensors/BME280/bme280_mock_driver.h"
+#include "../Sensors/BME280/bme280_api.h"
 
 int main(void) {
-    
-    printf("BME280 host test starting...\n");
+    printf("BME280 ZMQ test starting...\n");
 
-    /* Register the mock driver explicitly */
-    BME280_RegisterDriver(NULL);
+    // Register the mock driver
+    BME280_RegisterDriver(&bme280_default_driver);
 
+    // Initialize BME280 (will fail if publisher is down)
     if (BME280_Init() != 0) {
-        printf("BME280_Init failed\n");
+        fprintf(stderr, "BME280_Init failed: publisher may be down\n");
         return 1;
     }
 
-    float t=0, p=0, h=0;
-    for (int i = 0; i < 5; i++) {
-        if (BME280_ReadAll(&t, &p, &h) == 0) {
-            printf("Temperature: %.2f C, Pressure: %.2f hPa, Humidity: %.2f %%\n", t, p, h);
-        } else {
-            printf("BME280_ReadAll failed\n");
-            return -1;
-        }
+    printf("BME280 initialized successfully\n");
 
-        sleep(1); // Sleep 1 second between readings
+    float temp, press, hum;
+
+    // Read values continuously
+    while (1) {
+        if (BME280_ReadAll(&temp, &press, &hum) == 0) {
+            printf("Temp: %.2f °C | Pressure: %.2f hPa | Humidity: %.2f %%\n",
+                   temp, press, hum);
+        } else {
+            printf("Failed to read BME280 values\n");
+        }
+        sleep(1);
     }
 
     return 0;
