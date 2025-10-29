@@ -41,6 +41,8 @@ typedef enum {
 
 	ERR_MISC_ERR                          = -12,  // Undefined software exception
 	ERR_LOGIC_FAIL                        = -13,  // FSM state went invalid
+
+	ERR_TELEMETRY_SEND_FAIL               = -14,
 } MessageCode_t;
 
 

@@ -1,7 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <packet.h>
+
+#include "packet.h"
 
 //--- LOGGER ---
 
@@ -20,6 +21,11 @@
 #define CRC_SIZE 1
 #define LOG_HEADER_SIZE 2  // message code + message length
 #define MAX_LOG_MESSAGE_LEN (MAX_PACKET_LENGTH - sizeof(HeaderPacket) - LOG_HEADER_SIZE - CRC_SIZE)
+
+
+// --- TELEMETRY ---
+
+#define TELEMETRY_INTERVAL_MS 100
 
 
 // --- LAUNCH AND APOGEE DETECTION  ---

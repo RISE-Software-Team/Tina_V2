@@ -24,6 +24,7 @@ static bool is_high_priority(MessageCode_t code)
 	case ERR_BARO_READ_PRESSURE_FAIL:
 	case ERR_MISC_ERR:
 	case ERR_LOGIC_FAIL:
+	case ERR_TELEMETRY_SEND_FAIL:
 		return false;
 	default:
 		return true;
