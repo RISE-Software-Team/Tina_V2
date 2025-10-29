@@ -26,7 +26,6 @@ typedef struct {
 // API functions
 // --------------------------------------------------------
 void BNO055_RegisterDriver(const BNO055_Driver_t *driver);
-const BNO055_Driver_t *BNO055_GetRegisteredDriver(void);
 
 int8_t BNO055_Init(void);
 int BNO055_ReadAccel(BNO055_AccelData_t *accel);

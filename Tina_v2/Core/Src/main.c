@@ -110,9 +110,6 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  BME280_RegisterDriver(NULL);
-  BNO055_RegisterDriver(NULL);
-
   bool sanity_check_passed = true;
 
   HAL_Delay(1000);

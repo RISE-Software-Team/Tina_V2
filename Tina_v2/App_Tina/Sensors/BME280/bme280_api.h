@@ -28,7 +28,6 @@ typedef struct {
 // Public API
 // -----------------------------------------------------------------------------
 void BME280_RegisterDriver(const BME280_Driver_t *driver);
-const BME280_Driver_t *BME280_GetRegisteredDriver(void);
 
 int32_t BME280_Init(void);
 int BME280_ReadTemperature(float *temp);

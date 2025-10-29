@@ -7,23 +7,19 @@
 
 #include "bme280_api.h"
 
-// Pointer to the currently registered driver (mock or hardware)
-static const BME280_Driver_t *registered_driver = NULL;
-
 // Default hardware driver (defined in bme280_hw_driver.c)
 extern const BME280_Driver_t bme280_default_driver;
+
+// Pointer to the currently registered driver (mock or hardware)
+static const BME280_Driver_t *driver = &bme280_default_driver;
 
 /* -------------------------------------------------------------------------- */
 /* Driver registration and retrieval                                          */
 /* -------------------------------------------------------------------------- */
-void BME280_RegisterDriver(const BME280_Driver_t *driver)
+void BME280_RegisterDriver(const BME280_Driver_t *new_driver)
 {
-    registered_driver = (driver != NULL) ? driver : &bme280_default_driver;
-}
-
-const BME280_Driver_t *BME280_GetRegisteredDriver(void)
-{
-    return registered_driver ? registered_driver : &bme280_default_driver;
+	if (new_driver)
+		driver = new_driver;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -31,30 +27,25 @@ const BME280_Driver_t *BME280_GetRegisteredDriver(void)
 /* -------------------------------------------------------------------------- */
 int32_t BME280_Init(void)
 {
-    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
-    return drv->init ? drv->init() : -1;
+    return driver->init ? driver->init() : -1;
 }
 
 int BME280_ReadTemperature(float *temp)
 {
-    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
-    return drv->read_temperature ? drv->read_temperature(temp) : -1;
+    return driver->read_temperature ? driver->read_temperature(temp) : -1;
 }
 
 int BME280_ReadPressure(float *press)
 {
-    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
-    return drv->read_pressure ? drv->read_pressure(press) : -1;
+    return driver->read_pressure ? driver->read_pressure(press) : -1;
 }
 
 int BME280_ReadHumidity(float *hum)
 {
-    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
-    return drv->read_humidity ? drv->read_humidity(hum) : -1;
+    return driver->read_humidity ? driver->read_humidity(hum) : -1;
 }
 
 int BME280_ReadAll(float *temp, float *press, float *hum)
 {
-    const BME280_Driver_t *drv = BME280_GetRegisteredDriver();
-    return drv->read_all ? drv->read_all(temp, press, hum) : -1;
+    return driver->read_all ? driver->read_all(temp, press, hum) : -1;
 }
