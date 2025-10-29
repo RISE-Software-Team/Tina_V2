@@ -145,9 +145,7 @@ int main(void)
     radio_send_packet();
 
     sensors_read_all(&sensor_data);
-
-    if (telemetry_send(sensor_data, 0))
-      tlog(ERR_TELEMETRY_SEND_FAIL, "Telemetry send failed");
+    telemetry_send(sensor_data, 0);
 
     CheckAndRecoverI2C();
 	}
