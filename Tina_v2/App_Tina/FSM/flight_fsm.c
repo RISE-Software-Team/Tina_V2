@@ -10,12 +10,11 @@
 
 static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
 {
-    if (fsm->current_state == new_state) {
+    if (fsm->state == new_state) {
         return;
     }
     
-    fsm->previous_state = fsm->current_state;
-    fsm->current_state = new_state;
+    fsm->state = new_state;
     fsm->state_entry_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
     
     // Log state transition
@@ -146,8 +145,7 @@ MessageCode_t flight_fsm_init(FlightFSM_t *fsm)
     memset(fsm, 0, sizeof(FlightFSM_t));
 
     // --- Initialize FSM state ---
-    fsm->current_state = FLIGHT_STATE_PREFLIGHT;
-    fsm->previous_state = FLIGHT_STATE_PREFLIGHT;
+    fsm->state = FLIGHT_STATE_PREFLIGHT;
     fsm->state_entry_time_ms =  0; // TODO: Get actual timestamp using HAL_GetTick() or similar
 
     // --- Initialize subsystem statuses ---
@@ -225,7 +223,7 @@ void flight_fsm_update(FlightFSM_t *fsm)
     }
     
     // Execute current state handler
-    switch (fsm->current_state) {
+    switch (fsm->state) {
         case FLIGHT_STATE_PREFLIGHT:
             handle_preflight(fsm);
             break;

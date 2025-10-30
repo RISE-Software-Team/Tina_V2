@@ -62,9 +62,7 @@ typedef struct {
 // Main FSM Structure
 // -----------------------------------------------------------------------------
 typedef struct {
-    FlightState_t current_state;
-    FlightState_t previous_state;
-    
+    FlightState_t state;
     SystemStatus_t status;
     SensorData_t sensor_data;
     FlightLog_t flight_log;
