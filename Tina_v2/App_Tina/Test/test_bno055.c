@@ -1,53 +1,55 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-#include "../Sensors/BNO055/bno055_api.c"
-
+#include <unistd.h>
+#include "../Sensors/BNO055/bno055_mock_driver.h"
+#include "../Sensors/BNO055/bno055_api.h"
 
 int main(void) {
+    printf("BNO055 ZMQ test starting...\n");
 
-    printf("BNO055 host test starting...\n");
+    // Register the mock driver
+    BNO055_RegisterDriver(&bno055_default_driver);
 
-    /* Register the mock driver explicitly */
-    BNO055_RegisterDriver(NULL);
-
+    // Initialize BNO055 (will fail if publisher is down)
     if (BNO055_Init() != 0) {
-        printf("BNO055_Init failed\n");
+        fprintf(stderr, "BNO055_Init failed: publisher may be down\n");
         return 1;
     }
+
+    printf("BNO055 initialized successfully\n");
 
     BNO055_AccelData_t accel;
     BNO055_GyroData_t gyro;
     BNO055_EulerData_t euler;
 
-    for (int i = 0; i < 5; i++) {
-        printf("\nReading %d:\n", i + 1);
-        
+    // Read values continuously
+    while (1) {
+        // Read accelerometer
         if (BNO055_ReadAccel(&accel) == 0) {
-            printf("Accel: x=%.3f m/s^2, y=%.3f, z=%.3f\n", accel.x, accel.y, accel.z);
+            printf("Accel: X=%.2f m/s² | Y=%.2f m/s² | Z=%.2f m/s²\n",
+                   accel.x, accel.y, accel.z);
         } else {
-            printf("BNO055_ReadAccel failed\n");
-            return -1;
+            printf("Failed to read accelerometer\n");
         }
 
+        // Read gyroscope
         if (BNO055_ReadGyro(&gyro) == 0) {
-            printf("Gyro: x=%.3f deg/s, y=%.3f, z=%.3f\n", gyro.x, gyro.y, gyro.z);
+            printf("Gyro:  X=%.2f °/s | Y=%.2f °/s | Z=%.2f °/s\n",
+                   gyro.x, gyro.y, gyro.z);
         } else {
-            printf("BNO055_ReadGyro failed\n");
-            return -1;
+            printf("Failed to read gyroscope\n");
         }
 
+        // Read euler angles
         if (BNO055_ReadEuler(&euler) == 0) {
-            printf("Euler: heading=%.3f deg, roll=%.3f deg, pitch=%.3f deg\n", euler.heading, euler.roll, euler.pitch);
+            printf("Euler: Heading=%.2f° | Roll=%.2f° | Pitch=%.2f°\n",
+                   euler.heading, euler.roll, euler.pitch);
         } else {
-            printf("BNO055_ReadEuler failed\n");
-            return -1;
+            printf("Failed to read euler angles\n");
         }
 
-        sleep(1); // Sleep 1 second between readings
+        printf("---\n");
+        sleep(1);
     }
-
 
     return 0;
 }

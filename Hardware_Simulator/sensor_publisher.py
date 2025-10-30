@@ -13,7 +13,7 @@ while True:
     now = time.time()
 
     bme280 = {
-        "temperature": 25 + random.uniform(-1, 1),
+        "temperatwure": 25 + random.uniform(-1, 1),
         "pressure": 1000 + random.uniform(-5, 5),
         "humidity": 50 + random.uniform(-3, 3),
         "timestamp": now
@@ -22,7 +22,11 @@ while True:
     bno055 = {
         "accel": [random.uniform(-1, 1) for _ in range(3)],
         "gyro": [random.uniform(-180, 180) for _ in range(3)],
-        "mag": [random.uniform(-50, 50) for _ in range(3)],
+        "euler": {
+            "heading": random.uniform(0, 360),
+            "roll": random.uniform(-180, 180),
+            "pitch": random.uniform(-90, 90)
+        },
         "timestamp": now
     }
 
