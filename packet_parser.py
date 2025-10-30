@@ -11,7 +11,7 @@ PACKET_HEADER = 0xAA
 PACKET_TYPE_TELEMETRY = 0x01
 PACKET_TYPE_LOG       = 0x02  # all logs now go here
 
-HEADER_SIZE           = 11
+HEADER_SIZE           = 9
 
 MAX_MESSAGE_LEN       = 90
 
@@ -52,12 +52,17 @@ def calc_checksum(data: bytes) -> int:
 
 
 def parse_packet(buf: bytes):
-    if len(buf) < 9 or buf[0] != PACKET_HEADER:
+    try:
+        header, seq, length, timestamp, pkt_type = struct.unpack_from(">BHBIB", buf, 0)
+    except struct.error as e:
+        print(f"[WARN] packet header unpack failed: {e}")
         return None
 
-    seq = (buf[1] << 8) | buf[2]
-    length = buf[3]
-    if len(buf) != length:
+    if (header != PACKET_HEADER):
+        print(f"[WARN] Packet header magic number mismatch: expected {PACKET_HEADER}, got {header}")
+        return None
+
+    if (length != len(buf)):
         print(f"[WARN] Length mismatch: expected {length}, got {len(buf)}")
         return None
 
@@ -68,12 +73,9 @@ def parse_packet(buf: bytes):
         print(f"[DEBUG] Raw packet: {buf.hex(' ')}")
         return None
 
-    timestamp = struct.unpack_from(">I", buf, 4)[0]
-    pkt_type = buf[8]
+    offset = HEADER_SIZE
 
     if pkt_type == PACKET_TYPE_TELEMETRY:
-        offset = 9
-
         try:
             acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, pressure, altitude, fsm_state = \
                 struct.unpack_from(">6h2HB", buf, offset)
@@ -92,14 +94,11 @@ def parse_packet(buf: bytes):
         })
 
     elif pkt_type == PACKET_TYPE_LOG:
-        # Code is signed 8-bit
-        code_byte = buf[9]
-        code = struct.unpack(">b", bytes([code_byte]))[0]  # int8_t
+        code, msg_len = struct.unpack_from(">bB", buf, offset)
+        offset += 2
 
-        # Message length
-        msg_len = buf[10]
         if msg_len > 0:
-            message_bytes = buf[11:11+msg_len]
+            message_bytes = buf[offset:offset+msg_len]
             message = message_bytes.decode(errors="replace")
         else:
             message = None
