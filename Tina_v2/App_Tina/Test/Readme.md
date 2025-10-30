@@ -69,12 +69,6 @@ Output shows:
 - Gyroscope data (°/s)
 - Euler angles: heading, roll, pitch (degrees)
 
-**Run Both Tests:**
-```bash
-./run_tests.sh
-```
-This script runs both tests for 5 seconds each.
-
 ## Architecture
 
 ### BME280 Mock Driver
@@ -110,6 +104,7 @@ BME280 mock: Publisher detected and connected
 BME280 initialized successfully
 Temp: 24.93 °C | Pressure: 1000.00 hPa | Humidity: 49.54 %
 Temp: 25.02 °C | Pressure: 999.92 hPa | Humidity: 50.40 %
+---
 ```
 
 ### BNO055 Test
