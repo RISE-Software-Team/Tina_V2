@@ -30,18 +30,20 @@ typedef struct FlightFSM_t {
 
     void (*handler)(struct FlightFSM_t *fsm);
 
-    float altitude_m;
+    float ground_temp_k;
+    float ground_pres_pa;
 
-    float ground_pressure_pa;
-    float min_pressure_pa;
+    float min_pres_pa;
 
-    uint8_t pressure_index;
-    float pressure_history[PRESSURE_HISTORY_SIZE];
+    uint8_t pres_index;
+    float pres_hist[PRESSURE_HISTORY_SIZE];
+
+    float alt_m;
 } FlightFSM_t;
 
 const char *flight_fsm_get_state_name(FlightState_t state);
 void flight_fsm_init(FlightFSM_t *fsm);
-void flight_fsm_update_sensor_data(FlightFSM_t *fsm);
+void flight_fsm_update_data(FlightFSM_t *fsm);
 void flight_fsm_update(FlightFSM_t *fsm);
 
 #endif /* FLIGHT_FSM_H */

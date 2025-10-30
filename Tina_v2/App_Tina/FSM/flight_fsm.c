@@ -5,18 +5,28 @@
 #include "logger.h"
 
 #include <float.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
+
+#define DIFF_C_K 273.15f
+
+#define R_CONST 287.052874f
+#define G_CONST 9.80665f
+#define L_RATE  0.0065f
+#define ALPHA ((R_CONST * L_RATE) / G_CONST)
 
 /*******************************************************************************
  ****************************** Private functions ******************************
  *******************************************************************************/
 static void transition_state(FlightFSM_t *fsm, FlightState_t new_state);
 
+static float compute_altitude(float pres, float ground_pres, float ground_temp);
+
 /* Detection functions */
-static bool flight_fsm_check_launch_detected(FlightFSM_t *fsm);
-static bool flight_fsm_check_apogee_detected(FlightFSM_t *fsm);
-static bool flight_fsm_check_main_altitude_reached(FlightFSM_t *fsm);
+static bool launch_detected(FlightFSM_t *fsm);
+static bool apogee_detected(FlightFSM_t *fsm);
+static bool main_altitude_reached(FlightFSM_t *fsm);
 
 /* State handler functions */
 static void handle_preflight(FlightFSM_t *fsm);
@@ -50,10 +60,51 @@ void flight_fsm_init(FlightFSM_t *fsm)
     fsm->state = FLIGHT_STATE_PREFLIGHT;
     fsm->handler = handle_preflight;
 
-    fsm->ground_pressure_pa = FLT_MAX;
-    fsm->min_pressure_pa = FLT_MAX;
+    fsm->ground_temp_k = FLT_MAX;
+    fsm->ground_pres_pa = FLT_MAX;
+    fsm->min_pres_pa = FLT_MAX;
 
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Flight FSM initialized"); //TODO add log code
+}
+
+void flight_fsm_update_data(FlightFSM_t *fsm)
+{
+	if (!fsm)
+		return;
+
+    int8_t ret = sensors_read_all(&fsm->sensor_data);
+    switch (ret) {
+    case 0:
+    	fsm->status.baro_ok = true;
+    	fsm->status.imu_ok = true;
+    	break;
+    case -1:
+    	fsm->status.baro_ok = false;
+    	fsm->status.imu_ok = true;
+    	break;
+    case -2:
+    	fsm->status.baro_ok = true;
+    	fsm->status.imu_ok = false;
+    	break;
+    default:
+    	fsm->status.baro_ok = false;
+    	fsm->status.imu_ok = false;
+    }
+
+    if (fsm->status.baro_ok) {
+    	if (fsm->ground_temp_k != FLT_MAX) {
+            fsm->ground_temp_k = fsm->sensor_data.temp + DIFF_C_K;
+    		fsm->ground_pres_pa = fsm->sensor_data.pres;
+    		tlog(INFO_DEBUG, "Ground pressure set"); //TODO new code for this
+    	}
+
+    	fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->sensor_data.pres);
+
+        fsm->pres_hist[fsm->pres_index] = fsm->sensor_data.pres;
+    	fsm->pres_index = (fsm->pres_index + 1) % PRESSURE_HISTORY_SIZE;
+
+    	fsm->alt_m = compute_altitude(fsm->sensor_data.pres, fsm->ground_pres_pa, fsm->ground_temp_k);
+    }
 }
 
 void flight_fsm_update(FlightFSM_t *fsm)
@@ -96,8 +147,12 @@ static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
     tlog(INFO_DEBUG, message); //TODO add different log code
 }
 
+static float compute_altitude(float pres, float ground_pres, float ground_temp)
+{
+    return (ground_temp / L_RATE) * (1.0 - pow(pres / ground_pres, ALPHA));
+}
 
-static bool flight_fsm_check_launch_detected(FlightFSM_t *fsm)
+static bool launch_detected(FlightFSM_t *fsm)
 {
     if (!fsm)
         return false;
@@ -105,7 +160,7 @@ static bool flight_fsm_check_launch_detected(FlightFSM_t *fsm)
     if (fsm->status.imu_ok && fsm->sensor_data.acc_x > LAUNCH_ACCEL_THRESHOLD_MS2)
     	return true;
 
-    if (fsm->status.baro_ok && fsm->altitude_m > LAUNCH_ALTITUDE_THRESHOLD_M)
+    if (fsm->status.baro_ok && fsm->alt_m > LAUNCH_ALTITUDE_THRESHOLD_M)
     	return true;
 
     /* What should we do in the case both imu and baro are failing? */
@@ -113,25 +168,25 @@ static bool flight_fsm_check_launch_detected(FlightFSM_t *fsm)
     return false;
 }
 
-static float compute_average_pressure_from_history(float *pressure_history)
+static float compute_average_pressure_from_history(float *pres_hist)
 {
-	float avg_pressure = 0;
+	float avg_pres = 0;
 	for (uint8_t i = 0; i < PRESSURE_HISTORY_SIZE; i++)
-		avg_pressure += pressure_history[i];
-	return avg_pressure / PRESSURE_HISTORY_SIZE;
+		avg_pres += pres_hist[i];
+	return avg_pres / PRESSURE_HISTORY_SIZE;
 }
 
 /* Apogee is detected if the average pressure from history is
  * higher than the minimum pressure. */
-static bool flight_fsm_check_apogee_detected(FlightFSM_t *fsm)
+static bool apogee_detected(FlightFSM_t *fsm)
 {
     if (!fsm)
         return false;
 
-    float avg_pressure = compute_average_pressure_from_history(fsm->pressure_history);
+    float avg_pres = compute_average_pressure_from_history(fsm->pres_hist);
     bool apogee_detected = false;
 
-    if (fsm->status.baro_ok && avg_pressure > fsm->min_pressure_pa)
+    if (fsm->status.baro_ok && avg_pres > fsm->min_pres_pa)
     	apogee_detected = true;
 
     /* What should we do if the barometer failed? */
@@ -146,12 +201,12 @@ static bool flight_fsm_check_apogee_detected(FlightFSM_t *fsm)
     return apogee_countdown == 0;
 }
 
-static bool flight_fsm_check_main_altitude_reached(FlightFSM_t *fsm)
+static bool main_altitude_reached(FlightFSM_t *fsm)
 {
     if (!fsm)
     	return false;
 
-    if (fsm->status.baro_ok && fsm->altitude_m < MAIN_DEPLOY_ALTITUDE_M)
+    if (fsm->status.baro_ok && fsm->alt_m < MAIN_DEPLOY_ALTITUDE_M)
     	return true;
 
     /* What should we do if the barometer failed? */
@@ -164,7 +219,7 @@ static void handle_preflight(FlightFSM_t *fsm)
     if (!fsm)
         return;
 
-    if (flight_fsm_check_launch_detected(fsm))
+    if (launch_detected(fsm))
         transition_state(fsm, FLIGHT_STATE_POWERED_ASCENT);
 }
 
@@ -173,7 +228,7 @@ static void handle_powered_ascent(FlightFSM_t *fsm)
     if(!fsm)
         return;
 
-    if (flight_fsm_check_apogee_detected(fsm)) {
+    if (apogee_detected(fsm)) {
 
         /* Fire drogue */
 
@@ -194,7 +249,7 @@ static void handle_drogue_descent(FlightFSM_t *fsm)
     if (!fsm)
         return;
 
-    if (flight_fsm_check_main_altitude_reached(fsm)) {
+    if (main_altitude_reached(fsm)) {
 
         /* Fire main */
 

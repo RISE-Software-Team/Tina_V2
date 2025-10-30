@@ -69,8 +69,8 @@ static int hw_read_all(float *temp, float *press, float *hum)
     if (bme280_read_uncomp_pressure_temperature_humidity(&uncomp_pres, &uncomp_temp, &uncomp_hum) != BME280_SUCCESS)
         return -1;
 
-    if (temp)  *temp  = (float)bme280_compensate_temperature_int32(uncomp_temp) / 100.0f;
-    if (press) *press = (float)bme280_compensate_pressure_int32(uncomp_pres) / 100.0f;
+    if (temp)  *temp  = (float)bme280_compensate_temperature_int32(uncomp_temp) / 100.0f; // C
+    if (press) *press = (float)bme280_compensate_pressure_int32(uncomp_pres);             // Pa
     if (hum)   *hum   = (float)bme280_compensate_humidity_int32(uncomp_hum) / 1024.0f;
     return 0;
 }

@@ -19,7 +19,7 @@ void telemetry_send(SensorData_t sensor_data, float altitude, uint8_t fsm_state)
 	telemetry.gyro_x = (int16_t)sensor_data.gyro_x;
 	telemetry.gyro_y = (int16_t)sensor_data.gyro_y;
 	telemetry.gyro_z = (int16_t)sensor_data.gyro_z;
-	telemetry.pressure = (uint16_t)sensor_data.pressure;
+	telemetry.pressure = (uint16_t)sensor_data.pres;
 	telemetry.altitude = (uint16_t)altitude;
 	telemetry.fsm_state = fsm_state;
 
