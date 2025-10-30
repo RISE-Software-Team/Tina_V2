@@ -39,8 +39,3 @@ int BNO055_ReadGyro(BNO055_GyroData_t *gyro)
 {
     return driver->read_gyro ? driver->read_gyro(gyro) : -1;
 }
-
-int BNO055_ReadEuler(BNO055_EulerData_t *euler)
-{
-    return driver->read_euler ? driver->read_euler(euler) : -1;
-}

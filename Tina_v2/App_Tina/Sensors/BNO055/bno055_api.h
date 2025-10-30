@@ -19,7 +19,6 @@ typedef struct {
     int8_t (*init)(void);
     int (*read_accel)(BNO055_AccelData_t *accel);
     int (*read_gyro)(BNO055_GyroData_t *gyro);
-    int (*read_euler)(BNO055_EulerData_t *euler);
 } BNO055_Driver_t;
 
 // --------------------------------------------------------
@@ -30,6 +29,5 @@ void BNO055_RegisterDriver(const BNO055_Driver_t *driver);
 int8_t BNO055_Init(void);
 int BNO055_ReadAccel(BNO055_AccelData_t *accel);
 int BNO055_ReadGyro(BNO055_GyroData_t *gyro);
-int BNO055_ReadEuler(BNO055_EulerData_t *euler);
 
 #endif /* BNO055_API_H */

@@ -20,10 +20,4 @@ typedef struct {
     float z;
 } BNO055_GyroData_t;
 
-typedef struct {
-    float heading;  // degrees
-    float roll;
-    float pitch;
-} BNO055_EulerData_t;
-
 #endif /* BNO055_API_TYPES_H */

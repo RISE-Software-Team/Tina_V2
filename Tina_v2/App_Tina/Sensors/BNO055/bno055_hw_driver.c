@@ -28,7 +28,6 @@ static void BNO055_delay_msek(u32 msek);
 static s8 hw_init(void);
 static int hw_read_accel(BNO055_AccelData_t *accel);
 static int hw_read_gyro(BNO055_GyroData_t *gyro);
-static int hw_read_euler(BNO055_EulerData_t *euler);
 
 /* -------------------------------------------------------------------------- */
 /* Default hardware driver instance                                           */
@@ -37,7 +36,6 @@ const BNO055_Driver_t bno055_default_driver = {
     .init = hw_init,
     .read_accel = hw_read_accel,
     .read_gyro  = hw_read_gyro,
-    .read_euler = hw_read_euler,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -103,19 +101,6 @@ static int hw_read_gyro(BNO055_GyroData_t *gyro)
     gyro->x = (float)raw.x;
     gyro->y = (float)raw.y;
     gyro->z = (float)raw.z;
-    return 0;
-}
-
-static int hw_read_euler(BNO055_EulerData_t *euler)
-{
-    struct bno055_euler_t raw;
-    if (bno055_read_euler_hrp(&raw) != BNO055_SUCCESS)
-        return -1;
-
-    // Convert from 1 LSB = 1/16 degree
-    euler->heading = (float)raw.h / 16.0f;
-    euler->roll    = (float)raw.r / 16.0f;
-    euler->pitch   = (float)raw.p / 16.0f;
     return 0;
 }
 
