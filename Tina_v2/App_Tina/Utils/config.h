@@ -27,35 +27,13 @@
 
 // --- Flight FSM ---
 #define PRESSURE_HISTORY_SIZE 8
-#define COUNTDOWN_SIZE 5
 
+#define LAUNCH_ACCEL_THRESHOLD_MS2  30.0
+#define LAUNCH_ALTITUDE_THRESHOLD_M 20.0
 
+#define APOGEE_COUNTDOWN_SIZE 5
+#define APOGEE_TIMEOUT_S      20
 
-
-
-
-
-
-
-// --- LAUNCH AND APOGEE DETECTION  ---
-
-#define LAUNCH_ACCEL_THRESHOLD 3.0              // Minimum acceleration to detect launch (g)
-#define APOGEE_TIMEOUT 120                      // Max time after launch for drogue trigger (s)
-
-
-// --- RECOVERY ---
-
-#define MAIN_DEPLOY_ALTITUDE 250.0f             // Altitude to deploy the main chute (m)
-
-
-// --- TOUCHDOWN DETECTION CONFIG ---
-
-#define TOUCHDOWN_ACCEL_TOLERANCE 0.5f          // Allowed deviation from -9.81 m/s² (m/s²)
-#define TOUCHDOWN_STABLE_TIME 5.0f              // Duration acceleration must be stable to confirm touchdown (s)
-
-// New Stuff will later remove useless old configs
-#define LAUNCH_ACCEL_THRESHOLD_MS2 30.0f        // Minimum acceleration to detect launch (m/s²)
-# define TOUCHDOWN_ACCEL_TOLERANCE_MS2 0.5f     // ±0.5 m/s² around 9.81
-#define LAUNCH_ALTITUDE_THRESHOLD_M 20.0        // Minimum altitude to detect launch (m)
+#define MAIN_DEPLOY_ALTITUDE_M 250.0
 
 #endif // CONFIG_H
