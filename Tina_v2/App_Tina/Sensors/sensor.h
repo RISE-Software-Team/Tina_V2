@@ -13,9 +13,10 @@
 typedef struct {
     float acc_x, acc_y, acc_z;
     float gyro_x, gyro_y, gyro_z;
-    float pressure;
+    float temp;
+    float pres;
 } SensorData_t;
 
-uint8_t sensors_read_all(SensorData_t *data);
+int8_t sensors_read_all(SensorData_t *data);
 
 #endif /* SENSOR_H_ */
