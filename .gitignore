@@ -18,3 +18,4 @@ Backup/
 
 # Build output
 Tina_v2/App_Tina/Test/*_test
+Tina_v2/App_Tina/Test/build/*

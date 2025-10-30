@@ -38,6 +38,7 @@ while True:
             print(f"  Accel: X={accel[0]:6.2f} Y={accel[1]:6.2f} Z={accel[2]:6.2f} m/s²")
             print(f"  Gyro:  X={gyro[0]:6.2f} Y={gyro[1]:6.2f} Z={gyro[2]:6.2f} °/s")
             print(f"  Euler: H={euler.get('heading', 0):6.2f}° R={euler.get('roll', 0):6.2f}° P={euler.get('pitch', 0):6.2f}°")
+            print()
         
     except KeyboardInterrupt:
         print("\nExiting subscriber...")
