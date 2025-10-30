@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "config.h"
+#include "flight_fsm.h"
 #include "logger.h"
 #include "packet.h"
 #include "pyro_manager.h"
@@ -128,27 +129,27 @@ int main(void)
 
   HAL_Delay(1000);
 
+  FlightFSM_t fsm;
+  flight_fsm_init(&fsm);
+
   if (sanity_check_passed) {
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
   } else {
     tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, "Components sanity check failed");
   }
 
-  SensorData_t sensor_data = {0};
-
 //	arm_pyros();
   /* USER CODE END 2 */
 
   /* Infinite loop */
-	while (1)
+  while (1)
 	{
     radio_send_packet();
 
-    sensors_read_all(&sensor_data);
-    telemetry_send(sensor_data, 123, 0);
+    flight_fsm_update(&fsm);
 
     CheckAndRecoverI2C();
-	}
+  }
 }
 
 /**
