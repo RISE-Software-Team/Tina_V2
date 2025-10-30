@@ -1,8 +1,11 @@
 #include "flight_fsm.h"
+
 #include "config.h"
+#include "lang.h"
 #include "logger.h"
-#include <string.h>
+
 #include <math.h>
+#include <string.h>
 
 // -----------------------------------------------------------------------------
 // Private Helper Functions
@@ -149,7 +152,6 @@ MessageCode_t flight_fsm_init(FlightFSM_t *fsm)
     fsm->altitude_history_index = 0;
 
     // --- Other fields ---
-    fsm->apogee_confirm_count = 0;
     fsm->touchdown_confirm_count = 0;
     fsm->ground_altitude_m = 0.0f;
     fsm->ground_altitude_set = false;
@@ -279,16 +281,14 @@ bool flight_fsm_check_apogee_detected(FlightFSM_t *fsm)
     else
         apogee_detected = altitude_decreasing || accel_falling;  // Fallback if one sensor fails
 
-    // Apply confirmation counter with safety clamp
+    static int8_t apogee_countdown = 5;
     if (apogee_detected) {
-        if (fsm->apogee_confirm_count < 255)
-            fsm->apogee_confirm_count++;
+    	apogee_countdown = min(apogee_countdown - 1, 0);
     } else {
-        fsm->apogee_confirm_count = 0;
+    	apogee_countdown = 5;
     }
 
-    // Return true if confirmed for consecutive samples
-    return (fsm->apogee_confirm_count >= 5);
+    return apogee_countdown == 0;
 }
 
 bool flight_fsm_check_main_altitude_reached(FlightFSM_t *fsm)

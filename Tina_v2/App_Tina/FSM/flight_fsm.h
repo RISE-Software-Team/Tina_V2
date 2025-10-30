@@ -1,11 +1,7 @@
 #ifndef FLIGHT_FSM_H
 #define FLIGHT_FSM_H
 
-#include "../Utils/logger.h"
-#include "../Utils/config.h"
-
 #include "config.h"
-#include "logger.h"
 #include "sensor.h"
 
 #include <stdbool.h>
@@ -46,13 +42,12 @@ typedef struct {
     SensorData_t sensor_data;
 
     float max_altitude_m;
-    
-    uint8_t apogee_confirm_count;
+
     uint8_t touchdown_confirm_count;
     
     float altitude_history[ALT_HISTORY_LEN];
     uint8_t altitude_history_index;
-    
+   
     float ground_altitude_m;
     bool ground_altitude_set;
 } FlightFSM_t;
