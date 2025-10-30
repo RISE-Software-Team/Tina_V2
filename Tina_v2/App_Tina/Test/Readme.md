@@ -137,7 +137,6 @@ Euler: Heading=0.00° | Roll=0.06° | Pitch=-0.06°
 [1761785902] Temp: 25.32°C | Press: 1002.45 hPa | Hum: 51.23% | Accel: X=0.12 Y=0.05 Z=-9.75 (Mag=9.75) | Gyro: X=1.23 Y=-0.45 Z=0.78 | Euler: H=45.67 R=1.23 P=-0.45
 [1761785903] Temp: 24.98°C | Press: 1001.87 hPa | Hum: 49.77% | Accel: X=-0.03 Y=0.01 Z=-9.80 (Mag=9.80) | Gyro: X=0.12 Y=0.05 Z=-0.03 | Euler: H=46.01 R=0.98 P=-0.22
 ---
-```bash
 
 ## Troubleshooting
 
