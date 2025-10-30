@@ -44,26 +44,14 @@ typedef struct {
 } SystemStatus_t;
 
 // -----------------------------------------------------------------------------
-// Flight Log Structure
-// -----------------------------------------------------------------------------
-typedef struct {
-    uint32_t launch_time_ms;
-    uint32_t apogee_time_ms;
-    uint32_t drogue_deploy_time_ms;
-    uint32_t main_deploy_time_ms;
-    uint32_t touchdown_time_ms;
-    float max_altitude_m;
-    float max_acceleration_ms2;
-} FlightLog_t;
-
-// -----------------------------------------------------------------------------
 // Main FSM Structure
 // -----------------------------------------------------------------------------
 typedef struct {
     FlightState_t state;
     SystemStatus_t status;
     SensorData_t sensor_data;
-    FlightLog_t flight_log;
+
+    float max_altitude_m;
     
     uint32_t state_entry_time_ms;
     uint8_t apogee_confirm_count;

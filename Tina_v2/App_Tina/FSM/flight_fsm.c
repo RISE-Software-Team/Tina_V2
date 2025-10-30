@@ -43,7 +43,6 @@ static void handle_preflight(FlightFSM_t *fsm)
     
     // Check for launch
     if (flight_fsm_check_launch_detected(fsm)) {
-        fsm->flight_log.launch_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
         transition_state(fsm, FLIGHT_STATE_POWERED_ASCENT);
     }
 }
@@ -57,15 +56,13 @@ Once apogee is confirmed, the FSM transitions to the Drogue Descent state.
 static void handle_powered_ascent(FlightFSM_t *fsm)
 {
     // Update max altitude
-    if (fsm->sensor_data.altitude > fsm->flight_log.max_altitude_m) {
-        fsm->flight_log.max_altitude_m = fsm->sensor_data.altitude;
+    if (fsm->sensor_data.altitude > fsm->max_altitude_m) {
+        fsm->max_altitude_m = fsm->sensor_data.altitude;
     }
-    
+
     // Check for apogee
-    if (flight_fsm_check_apogee_detected(fsm)) {
-        fsm->flight_log.apogee_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
+    if (flight_fsm_check_apogee_detected(fsm))
         transition_state(fsm, FLIGHT_STATE_DROGUE_DESCENT);
-    }
 }
 
 // TODO: verify if actual chute is released. using sensor values
@@ -80,7 +77,6 @@ static void handle_drogue_descent(FlightFSM_t *fsm)
     if (!fsm->status.drogue_fired) {
         // TODO: Fire drogue pyro
         fsm->status.drogue_fired = true;
-        fsm->flight_log.drogue_deploy_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
         tlog(INFO_DROGUE_PARACHUTE_DEPLOYED, "Drogue fired");
     }
     
@@ -96,14 +92,12 @@ static void handle_main_descent(FlightFSM_t *fsm)
     if (!fsm->status.main_fired) {
         // TODO: Fire main pyro
         fsm->status.main_fired = true;
-        fsm->flight_log.main_deploy_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
         tlog(INFO_MAIN_PARACHUTE_DEPLOYED, "Main fired");
     }
 
     
     // Check for touchdown
     if (flight_fsm_check_touchdown_detected(fsm)) {
-        fsm->flight_log.touchdown_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
         transition_state(fsm, FLIGHT_STATE_RECOVERY);
     }
 }
@@ -150,16 +144,6 @@ MessageCode_t flight_fsm_init(FlightFSM_t *fsm)
     fsm->status.pyro_armed = false;
     fsm->status.drogue_fired = false;
     fsm->status.main_fired = false;
-    
-    // --- Initialize Flight log ---
-    fsm->flight_log.launch_time_ms        = 0;
-    fsm->flight_log.apogee_time_ms        = 0;
-    fsm->flight_log.drogue_deploy_time_ms = 0;
-    fsm->flight_log.main_deploy_time_ms   = 0;
-    fsm->flight_log.touchdown_time_ms     = 0;
-    fsm->flight_log.max_altitude_m        = 0.0f;
-    fsm->flight_log.max_acceleration_ms2  = 0.0f;
-
 
     fsm->sensor_data.accel_x = 0.0f;
     fsm->sensor_data.accel_y = 0.0f;
