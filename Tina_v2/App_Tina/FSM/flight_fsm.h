@@ -27,10 +27,8 @@ typedef struct {
     float accel_x;              // m/s²
     float accel_y;              // m/s²
     float accel_z;              // m/s²
-    float accel_magnitude;      // m/s²
     float altitude;             // m (MSL)
     float pressure;             // hPa
-    uint32_t timestamp_ms;      // milliseconds
 } SensorData_t;
 
 // -----------------------------------------------------------------------------

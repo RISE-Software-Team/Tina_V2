@@ -61,11 +61,6 @@ static void handle_powered_ascent(FlightFSM_t *fsm)
         fsm->flight_log.max_altitude_m = fsm->sensor_data.altitude;
     }
     
-    float accel_ms2 = fsm->sensor_data.accel_magnitude;
-    if (accel_ms2 > fsm->flight_log.max_acceleration_ms2) {
-        fsm->flight_log.max_acceleration_ms2 = accel_ms2;
-    }
-    
     // Check for apogee
     if (flight_fsm_check_apogee_detected(fsm)) {
         fsm->flight_log.apogee_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
@@ -169,10 +164,8 @@ MessageCode_t flight_fsm_init(FlightFSM_t *fsm)
     fsm->sensor_data.accel_x = 0.0f;
     fsm->sensor_data.accel_y = 0.0f;
     fsm->sensor_data.accel_z = 0.0f;
-    fsm->sensor_data.accel_magnitude = 0.0f;
     fsm->sensor_data.altitude = 0.0f;
     fsm->sensor_data.pressure = 0.0f;
-    fsm->sensor_data.timestamp_ms = 0;
 
     // --- Initialize altitude history buffer ---
     memset(fsm->altitude_history, 0, sizeof(fsm->altitude_history));
@@ -205,12 +198,7 @@ void flight_fsm_update_sensors(FlightFSM_t *fsm,
         .accel_z = accel_z,
         .altitude = altitude,
         .pressure = pressure,
-        .timestamp_ms = 0  // TODO: replace with HAL_GetTick() or similar
     };
-
-    
-    // Calculate acceleration magnitude
-    fsm->sensor_data.accel_magnitude = sqrtf(accel_x * accel_x + accel_y * accel_y + accel_z * accel_z);
     
     fsm->altitude_history[fsm->altitude_history_index] = altitude;
     fsm->altitude_history_index = (fsm->altitude_history_index + 1) % ALT_HISTORY_LEN;
@@ -277,16 +265,13 @@ bool flight_fsm_check_launch_detected(FlightFSM_t *fsm)
         return false;
     }
 
-    // Linear acceleration magnitude in m/s² (gravity-compensated)
-    float accel_ms2 = fsm->sensor_data.accel_magnitude;
-
     // Altitude above ground level (AGL)
     float altitude_agl = fsm->sensor_data.altitude - fsm->ground_altitude_m;
 
     // Launch detected if:
     // - linear accel exceeds threshold (e.g., > 10 m/s²)
     // - OR altitude rises above threshold (e.g., > 10 m)
-    return (accel_ms2 > LAUNCH_ACCEL_THRESHOLD_MS2) ||
+    return (fsm->sensor_data.accel_x > LAUNCH_ACCEL_THRESHOLD_MS2) ||
            (altitude_agl > LAUNCH_ALTITUDE_THRESHOLD_M);
 }
 
@@ -361,7 +346,7 @@ bool flight_fsm_check_touchdown_detected(FlightFSM_t *fsm)
         return false;
 
     // Check if total acceleration is stable around 9.81 m/s² (stationary)
-    bool accel_stable = fabsf(fsm->sensor_data.accel_magnitude) < TOUCHDOWN_ACCEL_TOLERANCE_MS2;
+    bool accel_stable = false;
 
     // Compute altitude variation across history buffer
     float min_alt = fsm->altitude_history[0];
