@@ -11,26 +11,26 @@
 #include "bno055_api.h"
 #include "config.h"
 #include "logger.h"
+#include "main.h"
 
-#include <main.h>
-#include <subghz_phy_app.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-uint8_t sensors_read_all(SensorData_t *data)
+int8_t sensors_read_all(SensorData_t *data)
 {
 	BNO055_AccelData_t bno055_accel;
 	BNO055_GyroData_t bno055_gyro;
 	float pressure;
-	uint8_t ret = 0;
-	uint8_t rc;
+	bool baro_failed = false;
+	bool imu_failed = false;
 
 	if (data == NULL)
 		return -1;
 
-	if ((rc = BME280_ReadPressure(&pressure))) {
+	if (BME280_ReadPressure(&pressure)) {
 		data->pressure = -1;
 
-		ret = rc;
-
+		baro_failed = true;
 		tlog(ERR_BARO_READ_PRESSURE_FAIL, "Baro pressure read failed");
 	} else {
 		data->pressure = pressure;
@@ -41,8 +41,7 @@ uint8_t sensors_read_all(SensorData_t *data)
 		data->acc_y = -1;
 		data->acc_z = -1;
 
-		ret = rc;
-
+		imu_failed = true;
 		tlog(ERR_IMU_READ_ACCEL_FAIL, "IMU accel read failed");
 	} else {
 		data->acc_x = bno055_accel.x;
@@ -55,8 +54,7 @@ uint8_t sensors_read_all(SensorData_t *data)
 		data->gyro_y = -1;
 		data->gyro_z = -1;
 
-		ret = rc;
-
+		imu_failed = true;
 		tlog(ERR_IMU_READ_GYRO_FAIL, "IMU gyro read failed");
 	} else {
 		data->gyro_x = bno055_gyro.x;
@@ -64,5 +62,5 @@ uint8_t sensors_read_all(SensorData_t *data)
 		data->gyro_z = bno055_gyro.z;
 	}
 
-	return ret;
+	return (-1 * baro_failed) + (-2 * imu_failed);
 }

@@ -16,6 +16,6 @@ typedef struct {
     float pressure;
 } SensorData_t;
 
-uint8_t sensors_read_all(SensorData_t *data);
+int8_t sensors_read_all(SensorData_t *data);
 
 #endif /* SENSOR_H_ */
