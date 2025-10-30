@@ -7,11 +7,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define ALT_HISTORY_LEN 5
-
-// -----------------------------------------------------------------------------
-// Flight State Enumeration
-// -----------------------------------------------------------------------------
 typedef enum {
     FLIGHT_STATE_PREFLIGHT = 0,
     FLIGHT_STATE_POWERED_ASCENT,
@@ -21,57 +16,31 @@ typedef enum {
     FLIGHT_STATE_ERROR
 } FlightState_t;
 
-// -----------------------------------------------------------------------------
-// System Status Structure
-// -----------------------------------------------------------------------------
 typedef struct {
     bool imu_ok;
     bool barometer_ok;
-    bool lora_ok;
     bool pyro_armed;
     bool drogue_fired;
     bool main_fired;
 } SystemStatus_t;
 
-// -----------------------------------------------------------------------------
-// Main FSM Structure
-// -----------------------------------------------------------------------------
-typedef struct {
+typedef struct FlightFSM_t {
     FlightState_t state;
     SystemStatus_t status;
     SensorData_t sensor_data;
 
-    float max_altitude_m;
+    void (*handler)(struct FlightFSM_t *fsm);
 
-    uint8_t touchdown_confirm_count;
-    
-    float altitude_history[ALT_HISTORY_LEN];
-    uint8_t altitude_history_index;
-   
-    float ground_altitude_m;
-    bool ground_altitude_set;
+    float ground_pressure_pa;
+    float max_pressure_pa;
+
+    uint8_t pressure_index;
+    float pressure_history[PRESSURE_HISTORY_SIZE];
 } FlightFSM_t;
 
-// -----------------------------------------------------------------------------
-// Public API Functions
-// -----------------------------------------------------------------------------
-
-MessageCode_t flight_fsm_init(FlightFSM_t *fsm);
-
-void flight_fsm_update_sensors(FlightFSM_t *fsm,
-                                float accel_x, float accel_y, float accel_z,
-                                float altitude, float pressure);
-
-void flight_fsm_update(FlightFSM_t *fsm);
-
 const char *flight_fsm_get_state_name(FlightState_t state);
-
-// -----------------------------------------------------------------------------
-// Detection Functions
-// -----------------------------------------------------------------------------
-bool flight_fsm_check_launch_detected(FlightFSM_t *fsm);
-bool flight_fsm_check_apogee_detected(FlightFSM_t *fsm);
-bool flight_fsm_check_main_altitude_reached(FlightFSM_t *fsm);
-bool flight_fsm_check_touchdown_detected(FlightFSM_t *fsm);
+void flight_fsm_init(FlightFSM_t *fsm);
+void flight_fsm_compute_altitude(FlightFSM_t *fsm);
+void flight_fsm_update(FlightFSM_t *fsm);
 
 #endif /* FLIGHT_FSM_H */

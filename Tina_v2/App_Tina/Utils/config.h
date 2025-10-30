@@ -5,7 +5,6 @@
 #include "packet.h"
 
 //--- LOGGER ---
-
 #define TLOG_DEBUG 1 // Radio used for debugging, allows for strings
 
 //#define ENABLE_SERIAL_LOG 1 // This used by logger to send serial data over uart pins
@@ -24,8 +23,18 @@
 
 
 // --- TELEMETRY ---
-
 #define TELEMETRY_INTERVAL_MS 100
+
+// --- Flight FSM ---
+#define PRESSURE_HISTORY_SIZE 8
+#define COUNTDOWN_SIZE 5
+
+
+
+
+
+
+
 
 
 // --- LAUNCH AND APOGEE DETECTION  ---
@@ -49,4 +58,4 @@
 # define TOUCHDOWN_ACCEL_TOLERANCE_MS2 0.5f     // ±0.5 m/s² around 9.81
 #define LAUNCH_ALTITUDE_THRESHOLD_M 20.0        // Minimum altitude to detect launch (m)
 
-#endif // GLOBAL_CONFIG_H
+#endif // CONFIG_H
