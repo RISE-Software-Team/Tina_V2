@@ -19,7 +19,7 @@ typedef enum {
 
 typedef struct {
     uint8_t  header;
-    uint16_t seq_num;
+    uint32_t seq_num;
     uint8_t  packet_len;
     uint32_t timestamp;
     uint8_t  packet_type;

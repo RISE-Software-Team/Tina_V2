@@ -14,8 +14,7 @@
 
 #define PACKET_HEADER 0xAA
 
-uint16_t seq_num = 0;
-
+uint32_t seq_num = 0;
 
 static void pack_16(uint8_t *buf, uint16_t value) {
     buf[0] = (value >> 8) & 0xFF;
@@ -38,14 +37,13 @@ uint8_t packet_calculate_checksum(const uint8_t *buffer, uint8_t len) {
 }
 uint8_t packet_build_header(uint8_t *buffer){
     uint8_t idx = 0;
+
     buffer[idx++] = PACKET_HEADER;
-    buffer[idx++] = (seq_num >> 8) & 0xFF;
-    buffer[idx++] = seq_num & 0xFF;
-    seq_num++;
+    pack_32(&buffer[idx], seq_num++); idx += 4;
 
     idx += 1; // length placeholder
-    uint32_t ts = HAL_GetTick(); //must change this to time of launch not time since boot
-    pack_32(&buffer[idx], ts); idx += 4;
+
+    pack_32(&buffer[idx], HAL_GetTick()); idx += 4; //must change this to time of launch not time since boot
 
     return idx;
 
@@ -64,7 +62,7 @@ uint8_t packet_build_telemetry(uint8_t *buffer, TelemetryPacket_t data) {
     pack_16(&buffer[idx], data.pressure); idx += 2;
     pack_16(&buffer[idx], data.altitude); idx += 2;
     buffer[idx++] = data.fsm_state;
-    buffer[3] = idx+1; //accounting for the checksum
+    buffer[5] = idx + 1; //accounting for the checksum
 
     uint8_t crc = packet_calculate_checksum(buffer, idx);
     buffer[idx++] = crc;
@@ -90,7 +88,8 @@ uint8_t packet_build_log(uint8_t *buffer, LogPacket_t data)
         idx += msg_len;
     }
 
-    buffer[3] = idx + 1;
+    buffer[5] = idx + 1;
+
     uint8_t crc = packet_calculate_checksum(buffer, idx);
     buffer[idx++] = crc;
 

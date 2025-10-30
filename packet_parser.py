@@ -11,8 +11,7 @@ PACKET_HEADER = 0xAA
 PACKET_TYPE_TELEMETRY = 0x01
 PACKET_TYPE_LOG       = 0x02  # all logs now go here
 
-HEADER_SIZE           = 9
-
+HEADER_SIZE           = 11
 MAX_MESSAGE_LEN       = 90
 
 # Mapping code values to strings
@@ -53,7 +52,7 @@ def calc_checksum(data: bytes) -> int:
 
 def parse_packet(buf: bytes):
     try:
-        header, seq, length, timestamp, pkt_type = struct.unpack_from(">BHBIB", buf, 0)
+        header, seq, length, timestamp, pkt_type = struct.unpack_from(">BIBIB", buf, 0)
     except struct.error as e:
         print(f"[WARN] packet header unpack failed: {e}")
         return None
