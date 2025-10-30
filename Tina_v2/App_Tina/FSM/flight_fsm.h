@@ -3,6 +3,11 @@
 
 #include "../Utils/logger.h"
 #include "../Utils/config.h"
+
+#include "config.h"
+#include "logger.h"
+#include "sensor.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -19,17 +24,6 @@ typedef enum {
     FLIGHT_STATE_RECOVERY,
     FLIGHT_STATE_ERROR
 } FlightState_t;
-
-// -----------------------------------------------------------------------------
-// Sensor Data Structure
-// -----------------------------------------------------------------------------
-typedef struct {
-    float accel_x;              // m/s²
-    float accel_y;              // m/s²
-    float accel_z;              // m/s²
-    float altitude;             // m (MSL)
-    float pressure;             // hPa
-} SensorData_t;
 
 // -----------------------------------------------------------------------------
 // System Status Structure
@@ -53,7 +47,6 @@ typedef struct {
 
     float max_altitude_m;
     
-    uint32_t state_entry_time_ms;
     uint8_t apogee_confirm_count;
     uint8_t touchdown_confirm_count;
     

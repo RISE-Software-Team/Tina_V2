@@ -15,7 +15,6 @@ static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
     }
     
     fsm->state = new_state;
-    fsm->state_entry_time_ms = 0; // TODO: Get actual timestamp using HAL_GetTick() or similar
     
     // Log state transition
     tlog(INFO_DEBUG, "State transition");
@@ -36,7 +35,6 @@ static void handle_preflight(FlightFSM_t *fsm)
     // Assumes sanity check of sensors and other systems has already passed.
     // Set ground altitude reference on first valid reading
     if (!fsm->ground_altitude_set) {
-        fsm->ground_altitude_m = fsm->sensor_data.altitude;
         fsm->ground_altitude_set = true;
         tlog(INFO_ENTERED_PREFLIGHT_STAGE, "Ground altitude set");
     }
@@ -55,12 +53,6 @@ Once apogee is confirmed, the FSM transitions to the Drogue Descent state.
 */
 static void handle_powered_ascent(FlightFSM_t *fsm)
 {
-    // Update max altitude
-    if (fsm->sensor_data.altitude > fsm->max_altitude_m) {
-        fsm->max_altitude_m = fsm->sensor_data.altitude;
-    }
-
-    // Check for apogee
     if (flight_fsm_check_apogee_detected(fsm))
         transition_state(fsm, FLIGHT_STATE_DROGUE_DESCENT);
 }
@@ -135,7 +127,6 @@ MessageCode_t flight_fsm_init(FlightFSM_t *fsm)
 
     // --- Initialize FSM state ---
     fsm->state = FLIGHT_STATE_PREFLIGHT;
-    fsm->state_entry_time_ms =  0; // TODO: Get actual timestamp using HAL_GetTick() or similar
 
     // --- Initialize subsystem statuses ---
     fsm->status.imu_ok = false;
@@ -145,10 +136,12 @@ MessageCode_t flight_fsm_init(FlightFSM_t *fsm)
     fsm->status.drogue_fired = false;
     fsm->status.main_fired = false;
 
-    fsm->sensor_data.accel_x = 0.0f;
-    fsm->sensor_data.accel_y = 0.0f;
-    fsm->sensor_data.accel_z = 0.0f;
-    fsm->sensor_data.altitude = 0.0f;
+    fsm->sensor_data.acc_x = 0.0f;
+    fsm->sensor_data.acc_y = 0.0f;
+    fsm->sensor_data.acc_z = 0.0f;
+    fsm->sensor_data.gyro_x = 0.0f;
+    fsm->sensor_data.gyro_y = 0.0f;
+    fsm->sensor_data.gyro_z = 0.0f;
     fsm->sensor_data.pressure = 0.0f;
 
     // --- Initialize altitude history buffer ---
@@ -174,15 +167,6 @@ void flight_fsm_update_sensors(FlightFSM_t *fsm,
     if (!fsm) {
         return;
     }
-    
-    // Store sensor readings
-    fsm->sensor_data = (SensorData_t){
-        .accel_x = accel_x,
-        .accel_y = accel_y,
-        .accel_z = accel_z,
-        .altitude = altitude,
-        .pressure = pressure,
-    };
     
     fsm->altitude_history[fsm->altitude_history_index] = altitude;
     fsm->altitude_history_index = (fsm->altitude_history_index + 1) % ALT_HISTORY_LEN;
@@ -250,13 +234,15 @@ bool flight_fsm_check_launch_detected(FlightFSM_t *fsm)
     }
 
     // Altitude above ground level (AGL)
-    float altitude_agl = fsm->sensor_data.altitude - fsm->ground_altitude_m;
+//    float altitude_agl = fsm->sensor_data.altitude - fsm->ground_altitude_m;
+//
+//    // Launch detected if:
+//    // - linear accel exceeds threshold (e.g., > 10 m/s²)
+//    // - OR altitude rises above threshold (e.g., > 10 m)
+//    return (fsm->sensor_data.accel_x > LAUNCH_ACCEL_THRESHOLD_MS2) ||
+//           (altitude_agl > LAUNCH_ALTITUDE_THRESHOLD_M);
 
-    // Launch detected if:
-    // - linear accel exceeds threshold (e.g., > 10 m/s²)
-    // - OR altitude rises above threshold (e.g., > 10 m)
-    return (fsm->sensor_data.accel_x > LAUNCH_ACCEL_THRESHOLD_MS2) ||
-           (altitude_agl > LAUNCH_ALTITUDE_THRESHOLD_M);
+    return true;
 }
 
 
@@ -283,7 +269,7 @@ bool flight_fsm_check_apogee_detected(FlightFSM_t *fsm)
     bool altitude_decreasing = avg_slope < -0.3f;                // Threshold tuned for descent detection
 
     // Check IMU vertical acceleration
-    float accel_z = fsm->sensor_data.accel_z;                    // Linear accel, m/s²
+    float accel_z = fsm->sensor_data.acc_z;                    // Linear accel, m/s²
     bool accel_falling = accel_z < -1.0f;                        // Negative = downward acceleration
 
     // Combine both sources for robust apogee detection
@@ -309,11 +295,13 @@ bool flight_fsm_check_main_altitude_reached(FlightFSM_t *fsm)
 {
     if (!fsm) return false;
     if (!fsm->status.barometer_ok || !fsm->ground_altitude_set) return false;
-    // Calculate altitude above ground level
-    float altitude_agl = fsm->sensor_data.altitude - fsm->ground_altitude_m;
+//    // Calculate altitude above ground level
+//    float altitude_agl = fsm->sensor_data.altitude - fsm->ground_altitude_m;
+//
+//    // Main deployment triggered when below threshold
+//    return altitude_agl <= MAIN_DEPLOY_ALTITUDE;
     
-    // Main deployment triggered when below threshold
-    return altitude_agl <= MAIN_DEPLOY_ALTITUDE;
+    return true;
 }
 
 /**
