@@ -145,7 +145,7 @@ int main(void)
     radio_send_packet();
 
     sensors_read_all(&sensor_data);
-    telemetry_send(sensor_data, 0);
+    telemetry_send(sensor_data, 123, 0);
 
     CheckAndRecoverI2C();
 	}

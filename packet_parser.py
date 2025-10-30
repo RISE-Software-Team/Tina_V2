@@ -10,6 +10,9 @@ PACKET_HEADER = 0xAA
 
 PACKET_TYPE_TELEMETRY = 0x01
 PACKET_TYPE_LOG       = 0x02  # all logs now go here
+
+HEADER_SIZE           = 11
+
 MAX_MESSAGE_LEN       = 90
 
 # Mapping code values to strings
@@ -70,23 +73,23 @@ def parse_packet(buf: bytes):
 
     if pkt_type == PACKET_TYPE_TELEMETRY:
         offset = 9
-        acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z = struct.unpack_from(">hhhhhh", buf, offset)
-        offset += 12
-        altitude = struct.unpack_from(">I", buf, offset)[0]
-        offset += 4
-        event_flags = buf[offset]
-        sys_state = buf[offset + 1]
+
+        try:
+            acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, pressure, altitude, fsm_state = \
+                struct.unpack_from(">6h2HB", buf, offset)
+        except struct.error as e:
+            print(f"[WARN] telemetry unpack failed: {e}")
+            return None
 
         return ("telemetry", {
             "seq": seq,
             "timestamp": timestamp,
             "acc_x": acc_x, "acc_y": acc_y, "acc_z": acc_z,
             "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z,
+            "pressure": pressure,
             "altitude": altitude,
-            "event_flags": event_flags,
-            "sys_state": sys_state
+            "fsm_state": fsm_state
         })
-
 
     elif pkt_type == PACKET_TYPE_LOG:
         # Code is signed 8-bit
@@ -164,10 +167,10 @@ def main():
                     if parsed:
                         pkt_type, d = parsed
                         if pkt_type == "telemetry":
-                            print(f"[TLM] seq={d['seq']} ts={d['timestamp']} alt={d['altitude']}")
+                            print(f"[TLM] seq={d['seq']} ts={d['timestamp']} fsm_state={d['fsm_state']:02X}")
                             print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
                             print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
-                            print(f"      event_flags={d['event_flags']:02X} sys_state={d['sys_state']:02X}")
+                            print(f"      pres={d['pressure']} alt={d['altitude']}")
                         elif pkt_type == "log":
                             log_type = "INFO" if d['code'] > 0 else "ERROR"
                             print(f"[{log_type}] seq={d['seq']} ts={d['timestamp']} code={d['code_str']}")
