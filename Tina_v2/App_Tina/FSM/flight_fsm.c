@@ -160,7 +160,7 @@ static bool launch_detected(FlightFSM_t *fsm)
     if (!fsm)
         return false;
 
-    if (fsm->status.imu_ok && fsm->sensor_data.acc_x > LAUNCH_ACCEL_THRESHOLD_MS2)
+    if (fsm->status.imu_ok && fsm->sensor_data.acc_z > LAUNCH_ACCEL_THRESHOLD_MS2)
     	return true;
 
     if (fsm->status.baro_ok && fsm->alt_m > LAUNCH_ALTITUDE_THRESHOLD_M)
