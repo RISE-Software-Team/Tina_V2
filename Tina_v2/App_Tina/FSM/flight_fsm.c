@@ -140,7 +140,7 @@ static void update_data(FlightFSM_t *fsm)
     }
 
     if (fsm->status.baro_ok) {
-    	if (fsm->ground_temp_k != FLT_MAX) {
+        if (fsm->ground_temp_k == FLT_MAX) {
             fsm->ground_temp_k = fsm->sensor_data.temp + DIFF_C_K;
     		fsm->ground_pres_pa = fsm->sensor_data.pres;
     		tlog(INFO_DEBUG, "Ground pressure set"); //TODO new code for this

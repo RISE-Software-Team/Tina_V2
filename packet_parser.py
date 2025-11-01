@@ -16,7 +16,7 @@ MAX_MESSAGE_LEN       = 90
 
 # Mapping code values to strings
 MESSAGE_CODES = {
-    0:  "TLOG_DEBUG",
+    0:  "INFO_DEBUG",
     1:  "INFO_COMPONENT_SANITY_CHECK_PASS",
     2:  "INFO_ENTERED_PREFLIGHT_STAGE",
     3:  "INFO_ENTERED_POWERED_ASCENT_STAGE",
