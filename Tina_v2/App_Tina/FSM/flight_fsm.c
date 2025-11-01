@@ -166,8 +166,6 @@ static bool launch_detected(FlightFSM_t *fsm)
     if (fsm->status.baro_ok && fsm->alt_m > LAUNCH_ALTITUDE_THRESHOLD_M)
     	return true;
 
-    /* What should we do in the case both imu and baro are failing? */
-
     return false;
 }
 
