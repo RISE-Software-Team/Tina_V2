@@ -77,7 +77,7 @@ def parse_packet(buf: bytes):
     if pkt_type == PACKET_TYPE_TELEMETRY:
         try:
             acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, pressure, altitude, fsm_state = \
-                struct.unpack_from(">6h2HB", buf, offset)
+                struct.unpack_from(">8hB", buf, offset)
         except struct.error as e:
             print(f"[WARN] telemetry unpack failed: {e}")
             return None
