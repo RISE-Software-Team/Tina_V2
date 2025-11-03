@@ -204,6 +204,12 @@ def main():
                         if parsed:
                             pkt_type, d = parsed
                             if pkt_type == "telemetry":
+                                print(f"[TLM] seq={d['seq']} ts={d['timestamp']}")
+                                print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
+                                print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
+                                print(f"      pres={d['pressure']} alt={d['altitude']}")
+                                print(f"      state={d['fsm_state_str']}")
+
                                 writer.writerow(d.values())
                             elif pkt_type == "log":
                                 log_type = "INFO" if d['code'] > 0 else "ERROR"
