@@ -23,10 +23,23 @@ typedef struct {
     bool main_fired;
 } SystemStatus_t;
 
+typedef struct {
+    uint8_t pres_index;
+    float pres[HISTORY_SIZE];
+    float avg_pres;
+
+    float avg_alt;
+
+    uint8_t vert_acc_index;
+    float vert_acc[HISTORY_SIZE];
+    float avg_vert_acc;
+} FlightHistory_t;
+
 typedef struct FlightFSM_t {
     FlightState_t state;
     SystemStatus_t status;
     SensorData_t sensor_data;
+    FlightHistory_t hist;
 
     void (*handler)(struct FlightFSM_t *fsm);
 
@@ -34,11 +47,6 @@ typedef struct FlightFSM_t {
     float ground_pres_pa;
 
     float min_pres_pa;
-
-    uint8_t pres_index;
-    float pres_hist[PRESSURE_HISTORY_SIZE];
-
-    float alt_m;
 } FlightFSM_t;
 
 const char *flight_fsm_get_state_name(FlightState_t state);
