@@ -18,7 +18,6 @@ static u32 last_log_time[NUM_MESSAGE_CODES] = {0};
 static bool is_high_priority(MessageCode_t code)
 {
 	switch (code) {
-	case INFO_DEBUG:
 	case ERR_IMU_READ_ACCEL_FAIL:
 	case ERR_IMU_READ_GYRO_FAIL:
 	case ERR_BARO_READ_FAIL:
