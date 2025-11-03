@@ -3,16 +3,28 @@ import struct
 import time
 import re
 import binascii
+import os
+import csv
+
 PORT = "/dev/ttyUSB0"
 BAUD = 115200
 
 PACKET_HEADER = 0xAA
 
 PACKET_TYPE_TELEMETRY = 0x01
-PACKET_TYPE_LOG       = 0x02  # all logs now go here
+PACKET_TYPE_LOG       = 0x02
 
 HEADER_SIZE           = 11
 MAX_MESSAGE_LEN       = 90
+
+TELEMETRY_CSV_PATH = "telemetry.csv"
+TELEMETRY_CSV_FIELDNAMES = [
+    "seq", "timestamp",
+    "acc_x", "acc_y", "acc_z",
+    "gyro_x", "gyro_y", "gyro_z",
+    "pressure", "altitude",
+    "fsm_state", "fsm_state_str",
+]
 
 # Mapping code values to strings
 MESSAGE_CODES = {
@@ -158,48 +170,53 @@ def main():
     regex_rx = re.compile(r'\+TEST:\s*RX\s*"([0-9A-Fa-f]+)"')
     buffer = ""
 
-    while True:
-        data = ser.read(256).decode(errors="ignore")
-        if not data:
-            continue
+    telemetry_file = open(TELEMETRY_CSV_PATH, "a", newline="")
+    writer = csv.writer(telemetry_file)
 
-        buffer += data
+    try:
+        if os.fstat(telemetry_file.fileno()).st_size == 0:
+            writer.writerow(TELEMETRY_CSV_FIELDNAMES)
+    except Exception:
+        print("[WARN] Failed to write csv header")
 
-        # Process all lines we can find
-        while "\n" in buffer:
-            line, buffer = buffer.split("\n", 1)
-            line = line.strip()
-            if not line:
+    try:
+        while True:
+            data = ser.read(256).decode(errors="ignore")
+            if not data:
                 continue
 
-            match = regex_rx.search(line)
-            if match:
-                hex_payload = match.group(1)
-                try:
-                    packet_bytes = binascii.unhexlify(hex_payload)
+            buffer += data
 
-                    parsed = parse_packet(packet_bytes)
-                    if parsed:
-                        pkt_type, d = parsed
-                        if pkt_type == "telemetry":
-                            print(f"[TLM] seq={d['seq']} ts={d['timestamp']}")
-                            print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
-                            print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
-                            print(f"      pres={d['pressure']} alt={d['altitude']}")
-                            print(f"      state={d['fsm_state_str']}")
-                        elif pkt_type == "log":
-                            log_type = "INFO" if d['code'] > 0 else "ERROR"
-                            print(f"[{log_type}] seq={d['seq']} ts={d['timestamp']} code={d['code_str']}")
-                            if d['message']:
-                                print(f"        msg: {d['message']}")
+            # Process all lines we can find
+            while "\n" in buffer:
+                line, buffer = buffer.split("\n", 1)
+                line = line.strip()
+                if not line:
+                    continue
 
-                except Exception as e:
-                    print(f"[ERROR] Failed to parse RX hex: {e}")
+                match = regex_rx.search(line)
+                if match:
+                    hex_payload = match.group(1)
+                    try:
+                        packet_bytes = binascii.unhexlify(hex_payload)
 
+                        parsed = parse_packet(packet_bytes)
+                        if parsed:
+                            pkt_type, d = parsed
+                            if pkt_type == "telemetry":
+                                writer.writerow(d.values())
+                            elif pkt_type == "log":
+                                log_type = "INFO" if d['code'] > 0 else "ERROR"
+                                print(f"[{log_type}] seq={d['seq']} ts={d['timestamp']} code={d['code_str']}")
+                                if d['message']:
+                                    print(f"        msg: {d['message']}")
+
+                    except Exception as e:
+                        print(f"[ERROR] Failed to parse RX hex: {e}")
+    except KeyboardInterrupt:
+        telemetry_file.close()
+        print("\nStopped.")
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nStopped.")
+    main()
