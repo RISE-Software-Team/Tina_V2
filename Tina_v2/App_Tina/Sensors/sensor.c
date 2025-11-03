@@ -33,7 +33,7 @@ int8_t sensors_read_all(SensorData_t *data)
 		data->pres = -1;
 
 		baro_failed = true;
-		tlog(ERR_BARO_READ_PRESSURE_FAIL, "Baro pressure read failed");
+		tlog(ERR_BARO_READ_FAIL, NULL);
 	} else {
 		data->temp = temp;
 		data->pres = pres;
@@ -45,7 +45,7 @@ int8_t sensors_read_all(SensorData_t *data)
 		data->acc_z = -1;
 
 		imu_failed = true;
-		tlog(ERR_IMU_READ_ACCEL_FAIL, "IMU accel read failed");
+		tlog(ERR_IMU_READ_ACCEL_FAIL, NULL);
 	} else {
 		data->acc_x = bno055_accel.x;
 		data->acc_y = bno055_accel.y;
@@ -58,7 +58,7 @@ int8_t sensors_read_all(SensorData_t *data)
 		data->gyro_z = -1;
 
 		imu_failed = true;
-		tlog(ERR_IMU_READ_GYRO_FAIL, "IMU gyro read failed");
+		tlog(ERR_IMU_READ_GYRO_FAIL, NULL);
 	} else {
 		data->gyro_x = bno055_gyro.x;
 		data->gyro_y = bno055_gyro.y;

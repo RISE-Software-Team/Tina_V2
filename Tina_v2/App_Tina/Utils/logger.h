@@ -12,16 +12,22 @@ typedef enum {
 	// ---------- INFO CODES (positive) ----------
 	INFO_DEBUG                            = 0,
 
-	INFO_COMPONENT_SANITY_CHECK_PASS      = 1,
+	INFO_IMU_INIT_PASS                    = 1,
+	INFO_BARO_INIT_PASS                   = 2,
+	INFO_PYRO_ARM_PASS                    = 3,
+	INFO_FSM_INIT_PASS                    = 4,
 
-	INFO_ENTERED_PREFLIGHT_STAGE          = 2,
-	INFO_ENTERED_POWERED_ASCENT_STAGE     = 3,
-	INFO_ENTERED_DROGUE_DESCENT_STAGE     = 4,
-	INFO_ENTERED_MAIN_DESCENT_STAGE       = 5,
-	INFO_ENTERED_TOUCHDOWN_STAGE          = 6,
+	INFO_COMPONENT_SANITY_CHECK_PASS      = 5,
 
-	INFO_DROGUE_PARACHUTE_DEPLOYED        = 7,
-	INFO_MAIN_PARACHUTE_DEPLOYED          = 8,
+	INFO_ENTERED_PREFLIGHT_STAGE          = 6,
+	INFO_ENTERED_POWERED_ASCENT_STAGE     = 7,
+	INFO_ENTERED_DROGUE_DESCENT_STAGE     = 8,
+	INFO_ENTERED_MAIN_DESCENT_STAGE       = 9,
+
+	INFO_DROGUE_PARACHUTE_DEPLOYED        = 10,
+	INFO_MAIN_PARACHUTE_DEPLOYED          = 11,
+
+	INFO_GROUND_PRES_AND_TEMP_SET         = 12,
 
     // ---------- ERROR CODES (negative) ----------
 	ERR_COMPONENT_SANITY_CHECK_FAIL       = -1,
@@ -33,14 +39,16 @@ typedef enum {
 
 	ERR_BARO_INIT_FAIL                    = -6,   // BME280 failure
 	ERR_BARO_CALIB_FAIL                   = -7,
-	ERR_BARO_READ_PRESSURE_FAIL           = -8,
+	ERR_BARO_READ_FAIL                    = -8,
 
 	ERR_PYRO_DROGUE_FAIL                  = -9,   // Pyro channel firing fault
 	ERR_PYRO_MAIN_FAIL                    = -10,  // Pyro channel firing fault
 	ERR_TIMEOUT_APOGEE                    = -11,  // Drogue deployment triggered by safety timeout
 
-	ERR_MISC_ERR                          = -12,  // Undefined software exception
-	ERR_LOGIC_FAIL                        = -13,  // FSM state went invalid
+	ERR_I2C_LINE_FAIL                     = -12,
+
+	ERR_FSM_STATE_FAIL                    = -13,  // FSM state went invalid
+	ERR_MISC_ERR                          = -14,  // Undefined software exception
 } MessageCode_t;
 
 
