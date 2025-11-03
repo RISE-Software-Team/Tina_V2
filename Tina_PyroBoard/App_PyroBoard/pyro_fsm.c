@@ -1,22 +1,24 @@
-/*
- * pyro_fsm.c
- *
- *  Created on: Oct 11, 2025
- *      Author: krissal1234
- */
-
 #include "pyro_fsm.h"
+#include "main.h"
+
+#define FIRE_DELAY_MS 350
+
 States_t system_state = STATE_UNARMED;
 
+//bitfied to track which pyros have been fired
+// Bit 0: DROGUE, Bit 1: CHAMBER, Bit 2: MAIN, Bit 3: BACKUP
 
-/* --------------------------- ARM --------------------------- */
+static uint8_t pyro_fire_channel(PyroChannels_t channel);
+
+static uint8_t pyro_verify_fired(PyroChannels_t channel);
+uint8_t pyro_status_bits = 0;
+
 void pyro_arm(void)
 {
-    // Check all pyro read pins are LOW
-    if (HAL_GPIO_ReadPin(READ_PYRO_DROGUE_PORT, READ_PYRO_DROGUE_PIN) == GPIO_PIN_SET ||
-        HAL_GPIO_ReadPin(READ_PYRO_MAIN_PORT, READ_PYRO_MAIN_PIN) == GPIO_PIN_SET ||
-        HAL_GPIO_ReadPin(READ_PYRO_CHAMBER_PORT, READ_PYRO_CHAMBER_PIN) == GPIO_PIN_SET ||
-        HAL_GPIO_ReadPin(READ_PYRO_BACKUP_PORT, READ_PYRO_BACKUP_PIN) == GPIO_PIN_SET)
+    if (HAL_GPIO_ReadPin(READ_PYRO_DROGUE_PORT, READ_PYRO_DROGUE_PIN) == GPIO_PIN_RESET ||
+        HAL_GPIO_ReadPin(READ_PYRO_MAIN_PORT, READ_PYRO_MAIN_PIN) == GPIO_PIN_RESET ||
+        HAL_GPIO_ReadPin(READ_PYRO_CHAMBER_PORT, READ_PYRO_CHAMBER_PIN) == GPIO_PIN_RESET ||
+        HAL_GPIO_ReadPin(READ_PYRO_BACKUP_PORT, READ_PYRO_BACKUP_PIN) == GPIO_PIN_RESET)
     {
         system_state = STATE_FAULT;
         return;
@@ -25,93 +27,125 @@ void pyro_arm(void)
     system_state = STATE_ARMED;
 }
 
-
 void pyro_handle_command(CommandPacket_t *packet, uint8_t *tx_buffer)
 {
-    // defaults
     tx_buffer[0] = TX_NACK;
-    tx_buffer[1] = 0x00;
+    tx_buffer[1] = pyro_status_bits;
 
-    switch (packet->cmd)
+    switch(packet->cmd)
     {
         case CMD_ARM:
             pyro_arm();
             tx_buffer[0] = (system_state == STATE_ARMED) ? TX_ACK : TX_NACK;
+            pyro_status_bits = 0; //resettign bitfield
             break;
 
-        case CMD_FIRE:
-            pyro_fire(packet->param);
-            tx_buffer[0] = TX_ACK;
-            tx_buffer[1] = pyro_read(packet->param);
+        case CMD_FIRE_DROGUE:
+            if(system_state == STATE_ARMED)
+            {
+                uint8_t fired = pyro_fire_channel(PYRO_DROGUE);
+                tx_buffer[0] = fired ? TX_ACK : TX_NACK;
+            }
+            break;
+
+        case CMD_FIRE_MAIN:
+            if(system_state == STATE_ARMED)
+            {
+                pyro_fire_channel(PYRO_CHAMBER);
+                HAL_Delay(FIRE_DELAY_MS);
+                pyro_fire_channel(PYRO_MAIN);
+                HAL_Delay(FIRE_DELAY_MS);
+                pyro_fire_channel(PYRO_BACKUP);
+
+                uint8_t expected_bits = STATUS_CHAMBER | STATUS_MAIN | STATUS_BACKUP;
+                tx_buffer[0] = ((pyro_status_bits & expected_bits) == expected_bits) ? TX_ACK : TX_NACK;
+            }
             break;
 
         case CMD_STATUS:
             tx_buffer[0] = TX_ACK;
-            tx_buffer[1] = (uint8_t)system_state;
+            break;
+
+        default:
+            system_state = STATE_FAULT;
             break;
     }
+
+    tx_buffer[1] = pyro_status_bits;
 }
 
 
-uint8_t pyro_read(PyroChannels_t pyro_channel){
-
-	GPIO_PinState pin_state;
-
-	switch (pyro_channel)
-	{
-		case PYRO_DROGUE:
-			pin_state = HAL_GPIO_ReadPin(READ_PYRO_DROGUE_PORT, READ_PYRO_DROGUE_PIN);
-			break;
-
-		case PYRO_MAIN:
-			pin_state = HAL_GPIO_ReadPin(READ_PYRO_MAIN_PORT, READ_PYRO_MAIN_PIN);
-			break;
-
-		case PYRO_BACKUP:
-			pin_state = HAL_GPIO_ReadPin(READ_PYRO_BACKUP_PORT, READ_PYRO_BACKUP_PIN);
-			break;
-
-		case PYRO_CHAMBER:
-			pin_state = HAL_GPIO_ReadPin(READ_PYRO_CHAMBER_PORT, READ_PYRO_CHAMBER_PIN);
-			break;
-
-		default:
-			return TX_NACK;
-	}
-
-	return (pin_state == GPIO_PIN_SET) ? 1 : 0;
-
-}
-
-void pyro_fire(uint8_t channel)
+static uint8_t pyro_fire_channel(PyroChannels_t channel)
 {
+    GPIO_TypeDef *port = NULL;
+    uint16_t pin = 0;
 
-    if(system_state != STATE_ARMED)
+    switch(channel)
     {
-        system_state = STATE_FAULT;
-        return;
+        case PYRO_DROGUE:  port = ENABLE_PYRO_DROGUE_PORT; pin = ENABLE_PYRO_DROGUE_PIN; break;
+        case PYRO_CHAMBER: port = ENABLE_PYRO_CHAMBER_PORT; pin = ENABLE_PYRO_CHAMBER_PIN; break;
+        case PYRO_MAIN:    port = ENABLE_PYRO_MAIN_PORT;    pin = ENABLE_PYRO_MAIN_PIN;    break;
+        case PYRO_BACKUP:  port = ENABLE_PYRO_BACKUP_PORT;  pin = ENABLE_PYRO_BACKUP_PIN;  break;
+        default:
+            system_state = STATE_FAULT;
+            return 0;
     }
 
     system_state = STATE_FIRING;
 
-    switch(channel)
+    HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
+    HAL_Delay(FIRE_DELAY_MS);
+    HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
+
+
+
+    uint8_t fired = pyro_verify_fired(channel);
+    if(fired)
     {
-        case PYRO_DROGUE:    HAL_GPIO_WritePin(ENABLE_PYRO_DROGUE_PORT, ENABLE_PYRO_DROGUE_PIN, GPIO_PIN_SET);
-                           break;
-
-        case PYRO_MAIN:    HAL_GPIO_WritePin(ENABLE_PYRO_MAIN_PORT, ENABLE_PYRO_MAIN_PIN, GPIO_PIN_SET);
-                           break;
-
-        case PYRO_BACKUP:  HAL_GPIO_WritePin(ENABLE_PYRO_BACKUP_PORT, ENABLE_PYRO_BACKUP_PIN, GPIO_PIN_SET);
-                           break;
-
-        case PYRO_CHAMBER: HAL_GPIO_WritePin(ENABLE_PYRO_CHAMBER_PORT, ENABLE_PYRO_CHAMBER_PIN, GPIO_PIN_SET);
-                           break;
-
-        default:           system_state = STATE_FAULT;
-//                           all_pyros_off();
-                           return;
+        switch(channel)
+        {
+            case PYRO_DROGUE:  pyro_status_bits |= STATUS_DROGUE; break;
+            case PYRO_CHAMBER: pyro_status_bits |= STATUS_CHAMBER; break;
+            case PYRO_MAIN:    pyro_status_bits |= STATUS_MAIN;    break;
+            case PYRO_BACKUP:  pyro_status_bits |= STATUS_BACKUP;  break;
+        }
     }
 
     system_state = STATE_ARMED;
+    return fired;
+}
+
+
+
+static uint8_t pyro_verify_fired(PyroChannels_t channel)
+{
+    GPIO_TypeDef *port;
+    uint16_t pin;
+
+    switch (channel)
+    {
+        case PYRO_DROGUE:
+            port = READ_PYRO_DROGUE_PORT;
+            pin  = READ_PYRO_DROGUE_PIN;
+            break;
+        case PYRO_CHAMBER:
+            port = READ_PYRO_CHAMBER_PORT;
+            pin  = READ_PYRO_CHAMBER_PIN;
+            break;
+        case PYRO_MAIN:
+            port = READ_PYRO_MAIN_PORT;
+            pin  = READ_PYRO_MAIN_PIN;
+            break;
+        case PYRO_BACKUP:
+            port = READ_PYRO_BACKUP_PORT;
+            pin  = READ_PYRO_BACKUP_PIN;
+            break;
+        default:
+            return 0;
+    }
+
+
+    GPIO_PinState state = HAL_GPIO_ReadPin(port, pin);
+
+    return state == GPIO_PIN_RESET;
 }

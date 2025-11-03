@@ -59,9 +59,6 @@ static void MX_I2C1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define I2C_SLAVE_ADDR 0x42
-uint8_t rx_buffer[2];
-uint8_t tx_buffer[2];
 
 /* USER CODE END 0 */
 
@@ -98,8 +95,14 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_I2C_Slave_Receive_IT(&hi2c1, rx_buffer, 2);
+//  HAL_I2C_Slave_Receive_IT(&hi2c1, rx_buffer, 2);
 
+
+
+
+  uint8_t rx_buffer[2];
+  uint8_t tx_buffer[2] = {0xFF, 0xFF};
+  /* USER CODE END 0 */
 
   /* USER CODE END 2 */
 
@@ -107,6 +110,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	    if (HAL_I2C_Slave_Receive(&hi2c1, rx_buffer, sizeof(rx_buffer), HAL_MAX_DELAY) == HAL_OK)
+	    {
+	        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+
+	        CommandPacket_t packet;
+			  packet.cmd = rx_buffer[0];
+			  packet.param = rx_buffer[1];
+
+			  pyro_handle_command(&packet, tx_buffer);
+
+
+	        HAL_I2C_Slave_Transmit(&hi2c1, tx_buffer, sizeof(tx_buffer), HAL_MAX_DELAY);
+
+	        HAL_Delay(1);
+	    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -173,7 +191,7 @@ static void MX_I2C1_Init(void)
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
   hi2c1.Init.Timing = 0x00201D2B;
-  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.OwnAddress1 = 36;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;
@@ -278,23 +296,30 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(Pyro_Read_3_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;      // SDA/SCL need pull-ups
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF5_I2C1; // AF5 for PA9/PA10
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-    CommandPacket_t packet;
-    packet.cmd = rx_buffer[0];
-    packet.param = rx_buffer[1];
-
-    pyro_handle_command(&packet, tx_buffer);
-
-    HAL_I2C_Slave_Transmit_IT(&hi2c1, tx_buffer, 2);
-
-    HAL_I2C_Slave_Receive_IT(&hi2c1, rx_buffer, 2);
-}
-
+//void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+//{
+//    CommandPacket_t packet;
+//    packet.cmd = rx_buffer[0];
+//    packet.param = rx_buffer[1];
+//
+//    pyro_handle_command(&packet, tx_buffer);
+//
+//    HAL_I2C_Slave_Transmit_IT(&hi2c1, tx_buffer, 2);
+//
+//    HAL_I2C_Slave_Receive_IT(&hi2c1, rx_buffer, 2);
+//}
+//
 
 /* USER CODE END 4 */
 
