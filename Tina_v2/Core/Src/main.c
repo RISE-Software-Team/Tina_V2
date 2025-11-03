@@ -74,7 +74,6 @@ static void check_and_recover_i2c(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -133,8 +132,18 @@ int main(void)
 
   HAL_Delay(1000);
 
+  uint8_t pyro_response[2];
+  bool pyro_armed = arm_pyros(pyro_response);
+
+  if (pyro_armed) {
+    sanity_check_passed = false;
+    tlog(ERR_PYRO_ARM_FAIL, NULL);
+  } else {
+    tlog(INFO_PYRO_ARM_PASS, NULL);
+  }
+
   FlightFSM_t fsm;
-  flight_fsm_init(&fsm, false);
+  flight_fsm_init(&fsm, pyro_armed);
 
   if (sanity_check_passed) {
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, NULL);
@@ -142,7 +151,6 @@ int main(void)
     tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, NULL);
   }
 
-//	arm_pyros();
   /* USER CODE END 2 */
 
   /* Infinite loop */
