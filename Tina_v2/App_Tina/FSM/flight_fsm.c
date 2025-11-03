@@ -21,6 +21,7 @@
  ****************************** Private functions ******************************
  *******************************************************************************/
 static void transition_state(FlightFSM_t *fsm, FlightState_t new_state);
+static float compute_average_value_from_history(float *hist);
 static float compute_altitude(float pres, float ground_pres, float ground_temp);
 static void update_data(FlightFSM_t *fsm);
 
@@ -110,6 +111,14 @@ static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
     tlog(INFO_DEBUG, message); //TODO add different log code
 }
 
+static float compute_average_value_from_history(float *hist)
+{
+	float avg_val = 0;
+	for (uint8_t i = 0; i < HISTORY_SIZE; i++)
+		avg_val += hist[i];
+	return avg_val / HISTORY_SIZE;
+}
+
 static float compute_altitude(float pres, float ground_pres, float ground_temp)
 {
     return (ground_temp / L_RATE) * (1.0 - pow(pres / ground_pres, ALPHA));
@@ -143,15 +152,25 @@ static void update_data(FlightFSM_t *fsm)
         if (fsm->ground_temp_k == FLT_MAX) {
             fsm->ground_temp_k = fsm->sensor_data.temp + DIFF_C_K;
     		fsm->ground_pres_pa = fsm->sensor_data.pres;
+
+            for (uint8_t i = 0; i < HISTORY_SIZE; i++)
+                fsm->hist.pres[i] = fsm->sensor_data.pres;
+
     		tlog(INFO_DEBUG, "Ground pressure set"); //TODO new code for this
     	}
 
-    	fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->sensor_data.pres);
+        fsm->hist.pres[fsm->hist.pres_index] = fsm->sensor_data.pres;
+        fsm->hist.pres_index = (fsm->hist.pres_index + 1) % HISTORY_SIZE;
+        fsm->hist.avg_pres = compute_average_value_from_history(fsm->hist.pres);
+        fsm->hist.avg_alt = compute_altitude(fsm->hist.avg_pres, fsm->ground_pres_pa, fsm->ground_temp_k);
 
-        fsm->pres_hist[fsm->pres_index] = fsm->sensor_data.pres;
-    	fsm->pres_index = (fsm->pres_index + 1) % PRESSURE_HISTORY_SIZE;
+        fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->sensor_data.pres);
+    }
 
-    	fsm->alt_m = compute_altitude(fsm->sensor_data.pres, fsm->ground_pres_pa, fsm->ground_temp_k);
+    if (fsm->status.imu_ok) {
+        fsm->hist.vert_acc[fsm->hist.vert_acc_index] = fsm->sensor_data.acc_z;
+        fsm->hist.vert_acc_index = (fsm->hist.vert_acc_index + 1) % HISTORY_SIZE;
+        fsm->hist.avg_vert_acc = compute_average_value_from_history(fsm->hist.vert_acc);
     }
 }
 
@@ -160,21 +179,13 @@ static bool launch_detected(FlightFSM_t *fsm)
     if (!fsm)
         return false;
 
-    if (fsm->status.imu_ok && fsm->sensor_data.acc_z > LAUNCH_ACCEL_THRESHOLD_MS2)
+    if (fsm->status.imu_ok && fsm->hist.avg_vert_acc > LAUNCH_ACCEL_THRESHOLD_MS2)
     	return true;
 
-    if (fsm->status.baro_ok && fsm->alt_m > LAUNCH_ALTITUDE_THRESHOLD_M)
+    if (fsm->status.baro_ok && fsm->hist.avg_alt > LAUNCH_ALTITUDE_THRESHOLD_M)
     	return true;
 
     return false;
-}
-
-static float compute_average_pressure_from_history(float *pres_hist)
-{
-	float avg_pres = 0;
-	for (uint8_t i = 0; i < PRESSURE_HISTORY_SIZE; i++)
-		avg_pres += pres_hist[i];
-	return avg_pres / PRESSURE_HISTORY_SIZE;
 }
 
 /* Apogee is detected if the average pressure from history is
@@ -184,10 +195,8 @@ static bool apogee_detected(FlightFSM_t *fsm)
     if (!fsm)
         return false;
 
-    float avg_pres = compute_average_pressure_from_history(fsm->pres_hist);
     bool apogee_detected = false;
-
-    if (fsm->status.baro_ok && avg_pres > fsm->min_pres_pa)
+    if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa)
     	apogee_detected = true;
 
     /* What should we do if the barometer failed? */
@@ -207,7 +216,7 @@ static bool main_altitude_reached(FlightFSM_t *fsm)
     if (!fsm)
     	return false;
 
-    if (fsm->status.baro_ok && fsm->alt_m < MAIN_DEPLOY_ALTITUDE_M)
+    if (fsm->status.baro_ok && fsm->hist.avg_alt < MAIN_DEPLOY_ALTITUDE_M)
     	return true;
 
     /* What should we do if the barometer failed? */
