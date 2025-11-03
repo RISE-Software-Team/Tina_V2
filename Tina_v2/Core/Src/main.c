@@ -133,9 +133,9 @@ int main(void)
   HAL_Delay(1000);
 
   uint8_t pyro_response[2];
-  bool pyro_armed = arm_pyros(pyro_response);
+  uint8_t pyro_err = arm_pyros(pyro_response);
 
-  if (pyro_armed) {
+  if (pyro_err) {
     sanity_check_passed = false;
     tlog(ERR_PYRO_ARM_FAIL, NULL);
   } else {
@@ -143,7 +143,7 @@ int main(void)
   }
 
   FlightFSM_t fsm;
-  flight_fsm_init(&fsm, pyro_armed);
+  flight_fsm_init(&fsm, pyro_err == 0);
 
   if (sanity_check_passed) {
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, NULL);
