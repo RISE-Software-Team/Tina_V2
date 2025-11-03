@@ -54,7 +54,7 @@ extern "C" {
 #define LORA_IQ_INVERSION_ON                        false
 
 
-#define TX_QUEUE_SIZE 50
+#define TX_QUEUE_SIZE 100
 
 
 typedef struct {
