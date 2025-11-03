@@ -66,7 +66,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void CheckAndRecoverI2C(void);
+static void check_and_recover_i2c(void);
 
 /* USER CODE BEGIN PFP */
 
@@ -111,20 +111,24 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  bool sanity_check_passed = true;
-
   HAL_Delay(1000);
+
+  bool sanity_check_passed = true;
 
   if (BME280_Init()) {
     sanity_check_passed = false;
-    tlog(ERR_BARO_INIT_FAIL, "Baro init failed");
+    tlog(ERR_BARO_INIT_FAIL, NULL);
+  } else {
+    tlog(INFO_BARO_INIT_PASS, NULL);
   }
 
   HAL_Delay(1000);
 
   if (BNO055_Init()) {
     sanity_check_passed = false;
-    tlog(ERR_IMU_INIT_FAIL, "IMU init failed");
+    tlog(ERR_IMU_INIT_FAIL, NULL);
+  } else {
+    tlog(INFO_IMU_INIT_PASS, NULL);
   }
 
   HAL_Delay(1000);
@@ -133,9 +137,9 @@ int main(void)
   flight_fsm_init(&fsm);
 
   if (sanity_check_passed) {
-    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Components sanity check passed");
+    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, NULL);
   } else {
-    tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, "Components sanity check failed");
+    tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, NULL);
   }
 
 //	arm_pyros();
@@ -143,12 +147,10 @@ int main(void)
 
   /* Infinite loop */
   while (1)
-	{
+  {
     radio_send_packet();
-
     flight_fsm_update(&fsm);
-
-    CheckAndRecoverI2C();
+    check_and_recover_i2c();
   }
 }
 
@@ -219,14 +221,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-static void CheckAndRecoverI2C(void)
+static void check_and_recover_i2c(void)
 {
     if (HAL_I2C_GetError(&hi2c2) != HAL_OK) {
         HAL_I2C_DeInit(&hi2c2);
         HAL_I2C_Init(&hi2c2);
         BNO055_Init();
         BME280_Init();
-        tlog(INFO_DEBUG, "I2C RECOVERED + SENSORS REINIT");
+        tlog(ERR_I2C_LINE_FAIL, NULL);
     }
 }
 

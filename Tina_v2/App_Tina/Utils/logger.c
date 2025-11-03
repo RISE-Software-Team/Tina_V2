@@ -21,9 +21,10 @@ static bool is_high_priority(MessageCode_t code)
 	case INFO_DEBUG:
 	case ERR_IMU_READ_ACCEL_FAIL:
 	case ERR_IMU_READ_GYRO_FAIL:
-	case ERR_BARO_READ_PRESSURE_FAIL:
+	case ERR_BARO_READ_FAIL:
+	case ERR_I2C_LINE_FAIL:
+	case ERR_FSM_STATE_FAIL:
 	case ERR_MISC_ERR:
-	case ERR_LOGIC_FAIL:
 		return false;
 	default:
 		return true;

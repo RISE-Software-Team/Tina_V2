@@ -66,7 +66,7 @@ void flight_fsm_init(FlightFSM_t *fsm)
     fsm->ground_pres_pa = FLT_MAX;
     fsm->min_pres_pa = FLT_MAX;
 
-    tlog(INFO_COMPONENT_SANITY_CHECK_PASS, "Flight FSM initialized"); //TODO add log code
+    tlog(INFO_FSM_INIT_PASS, NULL);
 }
 
 void flight_fsm_update(FlightFSM_t *fsm)
@@ -84,31 +84,38 @@ static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
     if (fsm->state == new_state)
         return;
 
+    int8_t log_code = INFO_DEBUG;
+
     switch (new_state) {
     case FLIGHT_STATE_PREFLIGHT:
         fsm->handler = handle_preflight;
+        log_code = INFO_ENTERED_PREFLIGHT_STAGE;
         break;
     case FLIGHT_STATE_POWERED_ASCENT:
         fsm->handler = handle_powered_ascent;
+        log_code = INFO_ENTERED_POWERED_ASCENT_STAGE;
         break;
     case FLIGHT_STATE_DROGUE_DESCENT:
         fsm->handler = handle_drogue_descent;
+        log_code = INFO_ENTERED_DROGUE_DESCENT_STAGE;
         break;
     case FLIGHT_STATE_MAIN_DESCENT:
         fsm->handler = handle_main_descent;
+        log_code = INFO_ENTERED_MAIN_DESCENT_STAGE;
         break;
     case FLIGHT_STATE_ERROR:
         fsm->handler = handle_error;
+        log_code = ERR_FSM_STATE_FAIL;
         break;
     default:
         return;
     }
 
-    fsm->state = new_state;
+    char log_msg[MAX_LOG_MESSAGE_LEN];
+    snprintf(log_msg, sizeof(log_msg), "State transition: %u -> %u", fsm->state, new_state);
+    tlog(log_code, log_msg);
 
-    char message[MAX_LOG_MESSAGE_LEN];
-    snprintf(message, sizeof(message), "Transition: %u -> %u", fsm->state, new_state);
-    tlog(INFO_DEBUG, message); //TODO add different log code
+    fsm->state = new_state;
 }
 
 static float compute_average_value_from_history(float *hist)
@@ -156,7 +163,7 @@ static void update_data(FlightFSM_t *fsm)
             for (uint8_t i = 0; i < HISTORY_SIZE; i++)
                 fsm->hist.pres[i] = fsm->sensor_data.pres;
 
-    		tlog(INFO_DEBUG, "Ground pressure set"); //TODO new code for this
+            tlog(INFO_GROUND_PRES_AND_TEMP_SET, NULL);
     	}
 
         fsm->hist.pres[fsm->hist.pres_index] = fsm->sensor_data.pres;
@@ -243,17 +250,12 @@ static void handle_powered_ascent(FlightFSM_t *fsm)
         /* Fire drogue */
 
         fsm->status.drogue_fired = true;
-        tlog(INFO_DROGUE_PARACHUTE_DEPLOYED, "Drogue fired"); //TODO code for this
+        tlog(INFO_DROGUE_PARACHUTE_DEPLOYED, NULL);
 
         transition_state(fsm, FLIGHT_STATE_DROGUE_DESCENT);
     }
 }
 
-// TODO: verify if actual chute is released. using sensor values
-// same for the drogue chute.
-// 
-// TODO: Look into stuff for backup charge.
-// TODO: Time based deployment in case of sensor failure.
 static void handle_drogue_descent(FlightFSM_t *fsm)
 {
     if (!fsm)
@@ -264,7 +266,7 @@ static void handle_drogue_descent(FlightFSM_t *fsm)
         /* Fire main */
 
         fsm->status.main_fired = true;
-        tlog(INFO_DROGUE_PARACHUTE_DEPLOYED, "Main fired"); //TODO code for this
+        tlog(INFO_MAIN_PARACHUTE_DEPLOYED, NULL);
 
         transition_state(fsm, FLIGHT_STATE_MAIN_DESCENT);
     }
@@ -277,5 +279,5 @@ static void handle_main_descent(FlightFSM_t *fsm)
 
 static void handle_error(FlightFSM_t *fsm)
 {
-    tlog(ERR_LOGIC_FAIL, "FSM in error state"); //TODO code for this
+    tlog(ERR_FSM_STATE_FAIL, NULL);
 }
