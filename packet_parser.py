@@ -40,7 +40,13 @@ MESSAGE_CODES = {
     -13:"ERR_LOGIC_FAIL",
 }
 
-
+FSM_STATE = {
+    0: "FLIGHT_STATE_PREFLIGHT",
+    1: "FLIGHT_STATE_POWERED_ASCENT",
+    2: "FLIGHT_STATE_DROGUE_DESCENT",
+    3: "FLIGHT_STATE_MAIN_DESCENT",
+    4: "FLIGHT_STATE_ERROR",
+}
 
 def calc_checksum(data: bytes) -> int:
     """XOR checksum matching sender C code."""
@@ -89,7 +95,8 @@ def parse_packet(buf: bytes):
             "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z,
             "pressure": pressure,
             "altitude": altitude,
-            "fsm_state": fsm_state
+            "fsm_state": fsm_state,
+            "fsm_state_str": FSM_STATE.get(fsm_state, f"UNKNOWN({fsm_state})"),
         })
 
     elif pkt_type == PACKET_TYPE_LOG:
@@ -165,10 +172,11 @@ def main():
                     if parsed:
                         pkt_type, d = parsed
                         if pkt_type == "telemetry":
-                            print(f"[TLM] seq={d['seq']} ts={d['timestamp']} fsm_state={d['fsm_state']:02X}")
+                            print(f"[TLM] seq={d['seq']} ts={d['timestamp']}")
                             print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
                             print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
                             print(f"      pres={d['pressure']} alt={d['altitude']}")
+                            print(f"      state={d['fsm_state_str']}")
                         elif pkt_type == "log":
                             log_type = "INFO" if d['code'] > 0 else "ERROR"
                             print(f"[{log_type}] seq={d['seq']} ts={d['timestamp']} code={d['code_str']}")
