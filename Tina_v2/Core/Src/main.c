@@ -226,8 +226,6 @@ static void check_and_recover_i2c(void)
     if (HAL_I2C_GetError(&hi2c2) != HAL_OK) {
         HAL_I2C_DeInit(&hi2c2);
         HAL_I2C_Init(&hi2c2);
-        BNO055_Init();
-        BME280_Init();
         tlog(ERR_I2C_LINE_FAIL, NULL);
     }
 }
