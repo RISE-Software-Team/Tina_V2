@@ -87,7 +87,7 @@ static int hw_read_accel(BNO055_AccelData_t *accel)
     // Convert raw (1 LSB = 1 m/s²) to float
     accel->x = (float)raw.x;
     accel->y = (float)raw.y;
-    accel->z = (float)raw.z;
+    accel->z = (float)-raw.z;
     return 0;
 }
 
