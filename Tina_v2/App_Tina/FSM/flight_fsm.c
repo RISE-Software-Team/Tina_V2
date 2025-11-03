@@ -3,6 +3,7 @@
 #include "config.h"
 #include "lang.h"
 #include "logger.h"
+#include "pyro_manager.h"
 #include "telemetry.h"
 
 #include <float.h>
@@ -30,6 +31,10 @@ static bool launch_detected(FlightFSM_t *fsm);
 static bool apogee_detected(FlightFSM_t *fsm);
 static bool main_altitude_reached(FlightFSM_t *fsm);
 
+/* Pyro helper functions*/
+static void fire_drogue_and_transition(FlightFSM_t *fsm, uint32_t log_code);
+static void fire_main_and_transition(FlightFSM_t *fsm, uint32_t log_code);
+
 /* State handler functions */
 static void handle_preflight(FlightFSM_t *fsm);
 static void handle_powered_ascent(FlightFSM_t *fsm);
@@ -52,7 +57,7 @@ const char *flight_fsm_get_state_name(FlightState_t state)
     }
 }
 
-void flight_fsm_init(FlightFSM_t *fsm)
+void flight_fsm_init(FlightFSM_t *fsm, bool pyro_armed)
 {
     if (!fsm)
         return;
@@ -61,6 +66,8 @@ void flight_fsm_init(FlightFSM_t *fsm)
 
     fsm->state = FLIGHT_STATE_PREFLIGHT;
     fsm->handler = handle_preflight;
+
+    fsm->status.pyro_armed = pyro_armed;
 
     fsm->ground_temp_k = FLT_MAX;
     fsm->ground_pres_pa = FLT_MAX;
@@ -206,8 +213,6 @@ static bool apogee_detected(FlightFSM_t *fsm)
     if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa)
     	apogee_detected = true;
 
-    /* What should we do if the barometer failed? */
-
     static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;
     if (apogee_detected) {
     	apogee_countdown = min(apogee_countdown - 1, 0);
@@ -226,9 +231,47 @@ static bool main_altitude_reached(FlightFSM_t *fsm)
     if (fsm->status.baro_ok && fsm->hist.avg_alt < MAIN_DEPLOY_ALTITUDE_M)
     	return true;
 
-    /* What should we do if the barometer failed? */
-
     return false;
+}
+
+static void fire_drogue_and_transition(FlightFSM_t *fsm, uint32_t log_code)
+{
+    uint8_t drogue_response[2];
+    int8_t status;
+
+    status = deploy_parachute(DROGUE, drogue_response);
+
+    if (status != 0) {
+        tlog(ERR_PYRO_DROGUE_FAIL, "Drogue deployment failed");
+        // TODO: Decide what to do here? maybe fire main? ask chiefs
+        // transition_state(fsm, FLIGHT_STATE_ERROR);
+        return;
+    }
+
+    fsm->status.drogue_fired = true;
+    tlog(log_code, NULL);
+
+    transition_state(fsm, FLIGHT_STATE_DROGUE_DESCENT);
+}
+
+static void fire_main_and_transition(FlightFSM_t *fsm, uint32_t log_code)
+{
+    uint8_t main_response[2];
+    int8_t status;
+
+    status = deploy_parachute(MAIN, main_response);
+
+    if (status != 0) {
+        tlog(ERR_PYRO_MAIN_FAIL, "Main deployment failed");
+        //TODO decide what to do here?
+        transition_state(fsm, FLIGHT_STATE_ERROR);
+        return;
+    }
+
+    fsm->status.main_fired = true;
+    tlog(log_code, NULL);
+
+    transition_state(fsm, FLIGHT_STATE_MAIN_DESCENT);
 }
 
 static void handle_preflight(FlightFSM_t *fsm)
@@ -246,14 +289,12 @@ static void handle_powered_ascent(FlightFSM_t *fsm)
         return;
 
     if (apogee_detected(fsm)) {
-
-        /* Fire drogue */
-
-        fsm->status.drogue_fired = true;
-        tlog(INFO_DROGUE_PARACHUTE_DEPLOYED, NULL);
-
-        transition_state(fsm, FLIGHT_STATE_DROGUE_DESCENT);
+        fire_drogue_and_transition(fsm, INFO_DROGUE_PARACHUTE_DEPLOYED);
+        return;
     }
+
+    if (HAL_GetTick() - fsm->state_entry_time_ms > LAUNCH_TO_APOGEE_TIMEOUT_MS)
+        fire_drogue_and_transition(fsm, INFO_DROGUE_PARACHUTE_DEPLOYED_TIMEOUT);
 }
 
 static void handle_drogue_descent(FlightFSM_t *fsm)
@@ -262,14 +303,12 @@ static void handle_drogue_descent(FlightFSM_t *fsm)
         return;
 
     if (main_altitude_reached(fsm)) {
-
-        /* Fire main */
-
-        fsm->status.main_fired = true;
-        tlog(INFO_MAIN_PARACHUTE_DEPLOYED, NULL);
-
-        transition_state(fsm, FLIGHT_STATE_MAIN_DESCENT);
+        fire_main_and_transition(fsm, INFO_MAIN_PARACHUTE_DEPLOYED);
+        return;
     }
+
+    if (HAL_GetTick() - fsm->state_entry_time_ms > APOGEE_TO_MAIN_TIMEOUT_MS)
+        fire_main_and_transition(fsm, INFO_MAIN_PARACHUTE_DEPLOYED_TIMEOUT);
 }
 
 static void handle_main_descent(FlightFSM_t *fsm)

@@ -43,6 +43,8 @@ typedef struct FlightFSM_t {
 
     void (*handler)(struct FlightFSM_t *fsm);
 
+    uint32_t state_entry_time_ms;
+
     float ground_temp_k;
     float ground_pres_pa;
 
@@ -50,7 +52,7 @@ typedef struct FlightFSM_t {
 } FlightFSM_t;
 
 const char *flight_fsm_get_state_name(FlightState_t state);
-void flight_fsm_init(FlightFSM_t *fsm);
+void flight_fsm_init(FlightFSM_t *fsm, bool pyro_armed);
 void flight_fsm_update(FlightFSM_t *fsm);
 
 #endif /* FLIGHT_FSM_H */

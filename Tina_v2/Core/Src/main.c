@@ -134,7 +134,7 @@ int main(void)
   HAL_Delay(1000);
 
   FlightFSM_t fsm;
-  flight_fsm_init(&fsm);
+  flight_fsm_init(&fsm, false);
 
   if (sanity_check_passed) {
     tlog(INFO_COMPONENT_SANITY_CHECK_PASS, NULL);
