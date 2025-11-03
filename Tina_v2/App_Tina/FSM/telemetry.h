@@ -3,8 +3,10 @@
 
 #include "sensor.h"
 
+#include "flight_fsm.h"
+
 #include <stdint.h>
 
-void telemetry_send(SensorData_t sensor_data, float altitude, uint8_t fsm_state);
+void telemetry_send(FlightFSM_t *fsm);
 
 #endif /* TELEMETRY_H_ */

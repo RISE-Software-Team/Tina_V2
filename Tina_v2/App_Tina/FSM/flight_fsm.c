@@ -74,7 +74,7 @@ void flight_fsm_update(FlightFSM_t *fsm)
         return;
 
     update_data(fsm);
-    telemetry_send(fsm->sensor_data, fsm->alt_m, fsm->state);
+    telemetry_send(fsm);
     fsm->handler(fsm);
 }
 

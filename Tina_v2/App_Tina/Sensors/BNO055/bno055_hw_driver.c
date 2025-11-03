@@ -80,27 +80,25 @@ static s8 hw_init(void)
 /* -------------------------------------------------------------------------- */
 static int hw_read_accel(BNO055_AccelData_t *accel)
 {
-    struct bno055_accel_t raw;
-    if (bno055_read_accel_xyz(&raw) != BNO055_SUCCESS)
+    struct bno055_accel_float_t data;
+    if (bno055_convert_float_accel_xyz_msq(&data) != BNO055_SUCCESS)
         return -1;
 
-    // Convert raw (1 LSB = 1 m/s²) to float
-    accel->x = (float)raw.x;
-    accel->y = (float)raw.y;
-    accel->z = (float)-raw.z;
+    accel->x = data.x;
+    accel->y = data.y;
+    accel->z = -data.z;
     return 0;
 }
 
 static int hw_read_gyro(BNO055_GyroData_t *gyro)
 {
-    struct bno055_gyro_t raw;
-    if (bno055_read_gyro_xyz(&raw) != BNO055_SUCCESS)
+    struct bno055_gyro_float_t data;
+    if (bno055_convert_float_gyro_xyz_dps(&data) != BNO055_SUCCESS)
         return -1;
 
-    // Convert raw (1 LSB = 1 dps) to float
-    gyro->x = (float)raw.x;
-    gyro->y = (float)raw.y;
-    gyro->z = (float)raw.z;
+    gyro->x = data.x;
+    gyro->y = data.y;
+    gyro->z = data.z;
     return 0;
 }
 
