@@ -6,7 +6,7 @@ import binascii
 import os
 import csv
 
-PORT = "/dev/ttyUSB0"
+PORT = "COM21"
 BAUD = 115200
 
 PACKET_HEADER = 0xAA
