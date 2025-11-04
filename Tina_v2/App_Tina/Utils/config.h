@@ -5,7 +5,7 @@
 #include "packet.h"
 
 //--- LOGGER ---
-// #define TLOG_DEBUG 1 // Radio used for debugging, allows for strings
+ #define TLOG_DEBUG 1 // Radio used for debugging, allows for strings
 
 //#define ENABLE_SERIAL_LOG 1 // This used by logger to send serial data over uart pins
 

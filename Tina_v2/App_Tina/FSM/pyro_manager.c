@@ -21,6 +21,7 @@ static int8_t send_command(uint8_t cmd, uint16_t max_cmd_wait_ms, uint8_t *respo
         tlog(ERR_PYRO_SEND_COMMAND_FAIL, "I2C TX failed");
         return -1;
     }
+    HAL_Delay(max_cmd_wait_ms);
 
     HAL_StatusTypeDef ret = HAL_I2C_Master_Receive(&hi2c2, PYRO_BOARD_ADDR, response, 2, max_cmd_wait_ms);
 
@@ -35,7 +36,11 @@ static int8_t send_command(uint8_t cmd, uint16_t max_cmd_wait_ms, uint8_t *respo
 
 int8_t arm_pyros(uint8_t *response)
 {
-    return send_command(CMD_ARM, 50, response);
+
+    send_command(CMD_ARM, 50, response);
+    if(response[0] != TX_ACK) {
+        return -1;
+    }
 }
 
 int8_t deploy_parachute(Parachute_t type, uint8_t *response)
@@ -44,11 +49,11 @@ int8_t deploy_parachute(Parachute_t type, uint8_t *response)
 
     switch(type) {
         case DROGUE:
-            status = send_command(CMD_FIRE_DROGUE, 50, response);
+            status = send_command(CMD_FIRE_DROGUE, 200, response);
             break;
         case MAIN:
             // Longer timeout for main
-            status = send_command(CMD_FIRE_MAIN, 150, response);
+            status = send_command(CMD_FIRE_MAIN, 600, response);
             break;
         default:
             tlog(INFO_DEBUG, "Unknown parachute type");

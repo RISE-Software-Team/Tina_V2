@@ -29,12 +29,12 @@ typedef struct{
 	uint8_t param;
 } CommandPacket_t;
 
-//TODO maybe make it configurable
-#define ENABLE_PYRO_DROGUE_PIN    En_Pyro_1_Pin
-#define ENABLE_PYRO_DROGUE_PORT   En_Pyro_1_GPIO_Port
+//I pyro 2 - droge, pyro 3 -main, pyro 4 backup
+#define ENABLE_PYRO_DROGUE_PIN    En_Pyro_2_Pin
+#define ENABLE_PYRO_DROGUE_PORT   En_Pyro_2_GPIO_Port
 
-#define ENABLE_PYRO_CHAMBER_PIN   En_Pyro_2_Pin
-#define ENABLE_PYRO_CHAMBER_PORT  En_Pyro_2_GPIO_Port
+//#define ENABLE_PYRO_CHAMBER_PIN   En_Pyro_2_Pin
+//#define ENABLE_PYRO_CHAMBER_PORT  En_Pyro_2_GPIO_Port
 
 #define ENABLE_PYRO_MAIN_PIN      En_Pyro_3_Pin
 #define ENABLE_PYRO_MAIN_PORT     En_Pyro_3_GPIO_Port
@@ -42,11 +42,11 @@ typedef struct{
 #define ENABLE_PYRO_BACKUP_PIN    En_Pyro_4_Pin
 #define ENABLE_PYRO_BACKUP_PORT   En_Pyro_4_GPIO_Port
 
-#define READ_PYRO_DROGUE_PIN      Pyro_Read_1_Pin
-#define READ_PYRO_DROGUE_PORT     Pyro_Read_1_GPIO_Port
-
-#define READ_PYRO_CHAMBER_PIN     Pyro_Read_2_Pin
-#define READ_PYRO_CHAMBER_PORT    Pyro_Read_2_GPIO_Port
+#define READ_PYRO_DROGUE_PIN      Pyro_Read_2_Pin
+#define READ_PYRO_DROGUE_PORT     Pyro_Read_2_GPIO_Port
+//
+//#define READ_PYRO_CHAMBER_PIN     Pyro_Read_2_Pin
+//#define READ_PYRO_CHAMBER_PORT    Pyro_Read_2_GPIO_Port
 
 #define READ_PYRO_MAIN_PIN        Pyro_Read_3_Pin
 #define READ_PYRO_MAIN_PORT       Pyro_Read_3_GPIO_Port

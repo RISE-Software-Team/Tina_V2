@@ -18,11 +18,13 @@ extern I2C_HandleTypeDef hi2c2;
 #define CMD_FIRE_DROGUE 0x02
 #define CMD_FIRE_MAIN   0x03
 #define CMD_STATUS      0x04
-
+#define TX_ACK 0xAA
+#define TX_NACK 0xFF
 typedef enum{
 	DROGUE,
 	MAIN
 } Parachute_t;
+
 
 int8_t arm_pyros(uint8_t *response);
 int8_t deploy_parachute(Parachute_t type, uint8_t *response);
