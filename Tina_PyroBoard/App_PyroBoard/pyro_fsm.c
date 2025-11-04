@@ -15,16 +15,17 @@ uint8_t pyro_status_bits = 0;
 
 void pyro_arm(void)
 {
+    system_state = STATE_ARMED;
     if (HAL_GPIO_ReadPin(READ_PYRO_DROGUE_PORT, READ_PYRO_DROGUE_PIN) == GPIO_PIN_RESET ||
         HAL_GPIO_ReadPin(READ_PYRO_MAIN_PORT, READ_PYRO_MAIN_PIN) == GPIO_PIN_RESET ||
 //        HAL_GPIO_ReadPin(READ_PYRO_CHAMBER_PORT, READ_PYRO_CHAMBER_PIN) == GPIO_PIN_RESET ||
         HAL_GPIO_ReadPin(READ_PYRO_BACKUP_PORT, READ_PYRO_BACKUP_PIN) == GPIO_PIN_RESET)
     {
-        system_state = STATE_FAULT;
-        return;
+        // system_state = STATE_FAULT;
+        // return;
     }
 
-    system_state = STATE_ARMED;
+    // system_state = STATE_ARMED;
 }
 
 void pyro_handle_command(CommandPacket_t *packet, uint8_t *tx_buffer)
