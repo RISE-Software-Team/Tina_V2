@@ -27,9 +27,7 @@ typedef struct {
     uint8_t pres_index;
     float pres[HISTORY_SIZE];
     float avg_pres;
-
     float avg_alt;
-
     uint8_t vert_acc_index;
     float vert_acc[HISTORY_SIZE];
     float avg_vert_acc;

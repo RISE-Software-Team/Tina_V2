@@ -25,6 +25,7 @@ static void transition_state(FlightFSM_t *fsm, FlightState_t new_state);
 static float compute_average_value_from_history(float *hist);
 static float compute_altitude(float pres, float ground_pres, float ground_temp);
 static void update_data(FlightFSM_t *fsm);
+static void compute_altitude_no_temp(float pres, float ground_pres);
 
 /* Detection functions */
 static bool launch_detected(FlightFSM_t *fsm);
@@ -65,6 +66,7 @@ void flight_fsm_init(FlightFSM_t *fsm, bool pyro_armed)
     memset(fsm, 0, sizeof(FlightFSM_t));
 
     fsm->state = FLIGHT_STATE_PREFLIGHT;
+    fsm->state_entry_time_ms = HAL_GetTick();
     fsm->handler = handle_preflight;
 
     fsm->status.pyro_armed = pyro_armed;
@@ -84,6 +86,18 @@ void flight_fsm_update(FlightFSM_t *fsm)
     update_data(fsm);
     telemetry_send(fsm);
     fsm->handler(fsm);
+}
+static float compute_altitude_no_temp(float pres, float ground_pres)
+{
+    // Constants
+    const float T0 = 288.15f;     // Standard temp at sea level [K]
+    const float P0 = 101325.0f;   // Standard pressure at sea level [Pa]
+    const float g = 9.80665f;     // Gravity [m/s^2]
+    const float R = 287.05f;      // Gas constant for dry air [J/kg·K]
+    const float L = 0.0065f;      // Temperature lapse rate [K/m]
+
+    // Use ground pressure as reference instead of P0
+    return (T0 / L) * (1.0f - powf(pres / ground_pres, (R * L) / g));
 }
 
 static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
@@ -117,6 +131,8 @@ static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
     default:
         return;
     }
+
+    fsm->state_entry_time_ms = HAL_GetTick();
 
     char log_msg[MAX_LOG_MESSAGE_LEN];
     snprintf(log_msg, sizeof(log_msg), "State transition: %u -> %u", fsm->state, new_state);
@@ -176,7 +192,8 @@ static void update_data(FlightFSM_t *fsm)
         fsm->hist.pres[fsm->hist.pres_index] = fsm->sensor_data.pres;
         fsm->hist.pres_index = (fsm->hist.pres_index + 1) % HISTORY_SIZE;
         fsm->hist.avg_pres = compute_average_value_from_history(fsm->hist.pres);
-        fsm->hist.avg_alt = compute_altitude(fsm->hist.avg_pres, fsm->ground_pres_pa, fsm->ground_temp_k);
+        // fsm->hist.avg_alt = compute_altitude(fsm->hist.avg_pres, fsm->ground_pres_pa, fsm->ground_temp_k);
+        fsm->hist.avg_alt = compute_altitude_no_temp(fsm->hist.avg_pres, fsm->ground_pres_pa);
 
         fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->sensor_data.pres);
     }
@@ -210,12 +227,14 @@ static bool apogee_detected(FlightFSM_t *fsm)
         return false;
 
     bool apogee_detected = false;
+
     if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa)
     	apogee_detected = true;
 
     static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;
+
     if (apogee_detected) {
-    	apogee_countdown = min(apogee_countdown - 1, 0);
+    	apogee_countdown = max(apogee_countdown - 1, 0);
     } else {
     	apogee_countdown = APOGEE_COUNTDOWN_SIZE;
     }
@@ -264,8 +283,8 @@ static void fire_main_and_transition(FlightFSM_t *fsm, uint32_t log_code)
     if (status != 0) {
         tlog(ERR_PYRO_MAIN_FAIL, "Main deployment failed");
         //TODO decide what to do here?
-        transition_state(fsm, FLIGHT_STATE_ERROR);
-        return;
+        // transition_state(fsm, FLIGHT_STATE_ERROR);
+        // return;
     }
 
     fsm->status.main_fired = true;

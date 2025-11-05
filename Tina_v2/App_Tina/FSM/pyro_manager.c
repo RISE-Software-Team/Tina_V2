@@ -41,6 +41,7 @@ int8_t arm_pyros(uint8_t *response)
     if(response[0] != TX_ACK) {
         return -1;
     }
+    return 0;
 }
 
 int8_t deploy_parachute(Parachute_t type, uint8_t *response)

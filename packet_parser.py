@@ -6,7 +6,7 @@ import binascii
 import os
 import csv
 
-PORT = "COM21"
+PORT = "/dev/ttyUSB0"  # Adjust as needed
 BAUD = 115200
 
 PACKET_HEADER = 0xAA
@@ -18,6 +18,12 @@ HEADER_SIZE           = 11
 MAX_MESSAGE_LEN       = 90
 
 TELEMETRY_CSV_PATH = "telemetry.csv"
+INFO_ERR_CSV_PATH = "info_error_logs.csv"
+INFO_ERR_CSV_FIELDNAMES = [
+    "seq", "timestamp",
+    "code", "code_str", "message"
+]
+
 TELEMETRY_CSV_FIELDNAMES = [
     "seq", "timestamp",
     "acc_x", "acc_y", "acc_z",
