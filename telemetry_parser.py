@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-INPUT_FILE = "drone_test_results/drone_test_1.csv"   # or .csv
+INPUT_FILE = "drone_test_results/drone_test_2.csv"   # or .csv
 DELIMITER = ","                 # use "\t" for tab-separated, "," for CSV
 SAMPLE_RATE_HZ = 50              # optional: for time axis normalization
 

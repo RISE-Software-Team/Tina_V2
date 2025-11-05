@@ -194,7 +194,7 @@ static void update_data(FlightFSM_t *fsm)
         // fsm->hist.avg_alt = compute_altitude(fsm->hist.avg_pres, fsm->ground_pres_pa, fsm->ground_temp_k);
         fsm->hist.avg_alt = compute_altitude_no_temp(fsm->hist.avg_pres, fsm->ground_pres_pa);
 
-        fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->sensor_data.pres);
+        fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->hist.avg_pres);
     }
 
     if (fsm->status.imu_ok) {
@@ -209,11 +209,16 @@ static bool launch_detected(FlightFSM_t *fsm)
     if (!fsm)
         return false;
 
-    if (fsm->status.imu_ok && fsm->hist.avg_vert_acc > LAUNCH_ACCEL_THRESHOLD_MS2)
-    	return true;
+    if (fsm->status.imu_ok && fsm->hist.avg_vert_acc > LAUNCH_ACCEL_THRESHOLD_MS2){
 
-    if (fsm->status.baro_ok && fsm->hist.avg_alt > LAUNCH_ALTITUDE_THRESHOLD_M)
+        tlog(INFO_LAUNCH_DETECTED_FROM_ACCELERATION, NULL);
     	return true;
+    }
+
+    if (fsm->status.baro_ok && fsm->hist.avg_alt > LAUNCH_ALTITUDE_THRESHOLD_M){
+        tlog(INFO_LAUNCH_DETECTED_FROM_ALTITUDE, NULL);
+    	return true;
+    }
 
     return false;
 }
@@ -227,7 +232,7 @@ static bool apogee_detected(FlightFSM_t *fsm)
 
     bool apogee_detected = false;
 
-    if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa)
+    if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa + DELTA_PRESSURE_FOR_APOGEE_DETECTION_HPA)
     	apogee_detected = true;
 
     static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;

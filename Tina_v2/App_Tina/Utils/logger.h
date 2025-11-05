@@ -32,6 +32,9 @@ typedef enum {
 
 	INFO_GROUND_PRES_AND_TEMP_SET          = 14,
 
+	INFO_LAUNCH_DETECTED_FROM_ACCELERATION = 15,
+	INFO_LAUNCH_DETECTED_FROM_ALTITUDE		 = 16,
+
     // ---------- ERROR CODES (negative) ----------
 	ERR_COMPONENT_SANITY_CHECK_FAIL        = -1,
 
