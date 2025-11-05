@@ -24,8 +24,8 @@
 static void transition_state(FlightFSM_t *fsm, FlightState_t new_state);
 static float compute_average_value_from_history(float *hist);
 static float compute_altitude(float pres, float ground_pres, float ground_temp);
+
 static void update_data(FlightFSM_t *fsm);
-static void compute_altitude_no_temp(float pres, float ground_pres);
 
 /* Detection functions */
 static bool launch_detected(FlightFSM_t *fsm);
@@ -89,14 +89,13 @@ void flight_fsm_update(FlightFSM_t *fsm)
 }
 static float compute_altitude_no_temp(float pres, float ground_pres)
 {
-    // Constants
+
     const float T0 = 288.15f;     // Standard temp at sea level [K]
-    const float P0 = 101325.0f;   // Standard pressure at sea level [Pa]
     const float g = 9.80665f;     // Gravity [m/s^2]
     const float R = 287.05f;      // Gas constant for dry air [J/kg·K]
     const float L = 0.0065f;      // Temperature lapse rate [K/m]
 
-    // Use ground pressure as reference instead of P0
+
     return (T0 / L) * (1.0f - powf(pres / ground_pres, (R * L) / g));
 }
 

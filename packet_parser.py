@@ -6,8 +6,9 @@ import binascii
 import os
 import csv
 
-PORT = "/dev/ttyUSB0"  # Adjust as needed
+PORT = "COM21"
 BAUD = 115200
+PRINT_TELEMETRY_TO_CONSOLE = True
 
 PACKET_HEADER = 0xAA
 
@@ -210,11 +211,12 @@ def main():
                         if parsed:
                             pkt_type, d = parsed
                             if pkt_type == "telemetry":
-                                print(f"[TLM] seq={d['seq']} ts={d['timestamp']}")
-                                print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
-                                print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
-                                print(f"      pres={d['pressure']} alt={d['altitude']}")
-                                print(f"      state={d['fsm_state_str']}")
+                                if PRINT_TELEMETRY_TO_CONSOLE:
+                                    print(f"[TLM] seq={d['seq']} ts={d['timestamp']}")
+                                    print(f"      acc=({d['acc_x']},{d['acc_y']},{d['acc_z']})")
+                                    print(f"      gyro=({d['gyro_x']},{d['gyro_y']},{d['gyro_z']})")
+                                    print(f"      pres={d['pressure']} alt={d['altitude']}")
+                                    print(f"      state={d['fsm_state_str']}")
 
                                 writer.writerow(d.values())
                             elif pkt_type == "log":
