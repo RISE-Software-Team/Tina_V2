@@ -13,11 +13,6 @@
 
 #define DIFF_C_K 273.15f
 
-#define R_CONST 287.052874f
-#define G_CONST 9.80665f
-#define L_RATE  0.0065f
-#define ALPHA ((R_CONST * L_RATE) / G_CONST)
-
 /*******************************************************************************
  ****************************** Private functions ******************************
  *******************************************************************************/
@@ -89,17 +84,6 @@ void flight_fsm_update(FlightFSM_t *fsm)
     telemetry_send(fsm);
     fsm->handler(fsm);
 }
-static float compute_altitude_no_temp(float pres, float ground_pres)
-{
-
-    const float T0 = 288.15f;     // Standard temp at sea level [K]
-    const float g = 9.80665f;     // Gravity [m/s^2]
-    const float R = 287.05f;      // Gas constant for dry air [J/kg·K]
-    const float L = 0.0065f;      // Temperature lapse rate [K/m]
-
-
-    return (T0 / L) * (1.0f - powf(pres / ground_pres, (R * L) / g));
-}
 
 static void transition_state(FlightFSM_t *fsm, FlightState_t new_state)
 {
@@ -152,6 +136,12 @@ static float compute_average_value_from_history(float *hist)
 
 static float compute_altitude(float pres, float ground_pres, float ground_temp)
 {
+
+    static const float R_CONST = 287.052874f;
+    static const float G_CONST = 9.80665f;
+    static const float L_RATE  = 0.0065f;
+    static const float ALPHA   = (R_CONST * L_RATE) / G_CONST;
+
     return (ground_temp / L_RATE) * (1.0 - pow(pres / ground_pres, ALPHA));
 }
 
@@ -193,8 +183,7 @@ static void update_data(FlightFSM_t *fsm)
         fsm->hist.pres[fsm->hist.pres_index] = fsm->sensor_data.pres;
         fsm->hist.pres_index = (fsm->hist.pres_index + 1) % HISTORY_SIZE;
         fsm->hist.avg_pres = compute_average_value_from_history(fsm->hist.pres);
-        // fsm->hist.avg_alt = compute_altitude(fsm->hist.avg_pres, fsm->ground_pres_pa, fsm->ground_temp_k);
-        fsm->hist.avg_alt = compute_altitude_no_temp(fsm->hist.avg_pres, fsm->ground_pres_pa);
+        fsm->hist.avg_alt = compute_altitude(fsm->hist.avg_pres, fsm->ground_pres_pa, fsm->ground_temp_k);
 
         fsm->min_pres_pa = min(fsm->min_pres_pa, fsm->hist.avg_pres);
     }
