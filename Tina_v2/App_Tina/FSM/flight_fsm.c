@@ -232,7 +232,7 @@ static bool apogee_detected(FlightFSM_t *fsm)
 
     bool apogee_detected = false;
 
-    if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa + DELTA_PRESSURE_FOR_APOGEE_DETECTION_HPA)
+    if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa + DELTA_PRESSURE_FOR_APOGEE_DETECTION_PA)
     	apogee_detected = true;
 
     static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;
