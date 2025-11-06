@@ -59,7 +59,7 @@ uint8_t packet_build_telemetry(uint8_t *buffer, TelemetryPacket_t data) {
     pack_16(&buffer[idx], data.gyro_x); idx += 2;
     pack_16(&buffer[idx], data.gyro_y); idx += 2;
     pack_16(&buffer[idx], data.gyro_z); idx += 2;
-    pack_16(&buffer[idx], data.pressure); idx += 2;
+    pack_32(&buffer[idx], data.pressure); idx += 4;
     pack_16(&buffer[idx], data.altitude); idx += 2;
     buffer[idx++] = data.fsm_state;
     buffer[5] = idx + 1; //accounting for the checksum

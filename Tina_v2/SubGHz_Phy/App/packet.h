@@ -28,7 +28,7 @@ typedef struct {
 typedef struct {
     int16_t acc_x, acc_y, acc_z;
     int16_t gyro_x, gyro_y, gyro_z;
-    int16_t pressure;
+    int32_t pressure;
     int16_t altitude;
     uint8_t fsm_state;
 } TelemetryPacket_t;
