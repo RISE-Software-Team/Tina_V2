@@ -17,7 +17,7 @@ void telemetry_send(FlightFSM_t *fsm)
 	if (fsm->status.imu_ok) {
 		telemetry.acc_x = (int16_t)(fsm->sensor_data.acc_x * 100);
 		telemetry.acc_y = (int16_t)(fsm->sensor_data.acc_y * 100);
-		telemetry.acc_z = (int16_t)(fsm->sensor_data.acc_z * 100);
+		telemetry.acc_z = (int16_t)(fsm->hist.avg_vert_acc * 100);
 		telemetry.gyro_x = (int16_t)fsm->sensor_data.gyro_x;
 		telemetry.gyro_y = (int16_t)fsm->sensor_data.gyro_y;
 		telemetry.gyro_z = (int16_t)fsm->sensor_data.gyro_z;
@@ -31,7 +31,7 @@ void telemetry_send(FlightFSM_t *fsm)
 	}
 
 	if (fsm->status.baro_ok) {
-		telemetry.pressure = (int32_t)(fsm->sensor_data.pres);
+		telemetry.pressure = (int32_t)(fsm->hist.avg_pres);
 		telemetry.altitude = (int16_t)(fsm->hist.avg_alt * 100);
 	} else {
 		telemetry.pressure = -1;

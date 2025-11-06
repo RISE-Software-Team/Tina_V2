@@ -8,7 +8,7 @@ import csv
 
 PORT = "/dev/ttyUSB0"  # Update as needed
 BAUD = 115200
-PRINT_TELEMETRY_TO_CONSOLE = False
+PRINT_TELEMETRY_TO_CONSOLE = True
 
 PACKET_HEADER = 0xAA
 
