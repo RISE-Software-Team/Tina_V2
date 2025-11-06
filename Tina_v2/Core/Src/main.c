@@ -132,6 +132,7 @@ int main(void)
 
   HAL_Delay(1000);
 
+  char msg[64];
   uint8_t pyro_response[2];
   uint8_t pyro_err = arm_pyros(pyro_response) == -1 || pyro_response[0] != TX_ACK;
 
@@ -141,10 +142,11 @@ int main(void)
     tlog(ERR_PYRO_ARM_FAIL, NULL);
   } else {
     tlog(INFO_PYRO_ARM_PASS, NULL);
-  }
 
-  char msg[64];
-  snprintf(msg, sizeof(msg),"PYRO ARM response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
+    snprintf(msg, sizeof(msg),"PYRO ARM response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
+
+    tlog(INFO_PYRO_ARM_PASS, msg);
+  }
 
   FlightFSM_t fsm;
   flight_fsm_init(&fsm, pyro_err == 0);
@@ -155,33 +157,25 @@ int main(void)
     tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, NULL);
   }
 
-  // tlog(INFO_DEBUG,"Starting Pyro Test");
+  tlog(INFO_DEBUG,"Starting Pyro Test");
 
 
-  //  HAL_Delay(1000);
-  //  tlog(INFO_DEBUG, "Firing DROGUE...");
-  //  deploy_parachute(DROGUE, pyro_response);
-  //  HAL_Delay(200);
+   HAL_Delay(1000);
+   tlog(INFO_DEBUG, "Firing DROGUE...");
 
-  //  char drogue_msg[64];
+   deploy_parachute(DROGUE, pyro_response);
+   snprintf(msg, sizeof(msg),"DROGUE response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
+   tlog(INFO_DEBUG, msg);
 
-  //  snprintf(drogue_msg, sizeof(drogue_msg),"DROGUE deploy response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
+   HAL_Delay(5000);
 
-  //  tlog(INFO_DEBUG, drogue_msg);
+   tlog(INFO_DEBUG, "Firing MAIN...");
+   deploy_parachute(MAIN, pyro_response);
 
-  //  HAL_Delay(5000);
+   snprintf(msg, sizeof(msg),"MAIN response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
+   tlog(INFO_DEBUG, msg);
 
-  //  tlog(INFO_DEBUG, "Firing MAIN...");
-  //  deploy_parachute(MAIN, pyro_response);
-  //  HAL_Delay(200);
-
-  //  char main_msg[64];
-  //  snprintf(main_msg, sizeof(main_msg),
-  //           "MAIN deploy response: 0x%02X 0x%02X",
-  //           pyro_response[0], pyro_response[1]);
-  //  tlog(INFO_DEBUG, main_msg);
-
-  //  tlog(INFO_DEBUG, "Pyro Test Complete.");
+   tlog(INFO_DEBUG, "Pyro Test Complete.");
 
   /* USER CODE END 2 */
 
@@ -189,8 +183,8 @@ int main(void)
   while (1)
   {
     radio_send_packet();
-    flight_fsm_update(&fsm);
-    check_and_recover_i2c();
+    // flight_fsm_update(&fsm);
+    // check_and_recover_i2c();
   }
 }
 

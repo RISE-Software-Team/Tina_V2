@@ -262,7 +262,7 @@ static void fire_drogue_and_transition(FlightFSM_t *fsm, uint32_t log_code)
     status = deploy_parachute(DROGUE, drogue_response);
 
     if (status != 0) {
-        tlog(ERR_PYRO_DROGUE_FAIL, "Drogue deployment failed");
+        // tlog(ERR_PYRO_DROGUE_FAIL, "FIRE DROGUE failed");
         // TODO: Decide what to do here? maybe fire main? ask chiefs
         // transition_state(fsm, FLIGHT_STATE_ERROR);
         return;

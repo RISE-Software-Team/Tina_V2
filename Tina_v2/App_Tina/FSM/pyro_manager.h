@@ -18,8 +18,15 @@ extern I2C_HandleTypeDef hi2c2;
 #define CMD_FIRE_DROGUE 0x02
 #define CMD_FIRE_MAIN   0x03
 #define CMD_STATUS      0x04
+
 #define TX_ACK 0xAA
 #define TX_NACK 0xFF
+
+#define STATUS_DROGUE  (1 << 0)   // 0b00000001
+#define STATUS_CHAMBER (1 << 1)   // 0b00000010
+#define STATUS_MAIN    (1 << 2)   // 0b00000100
+#define STATUS_BACKUP  (1 << 3)   // 0b00001000
+
 typedef enum{
 	DROGUE,
 	MAIN

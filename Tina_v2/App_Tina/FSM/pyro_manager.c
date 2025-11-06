@@ -8,7 +8,7 @@
 #include "pyro_manager.h"
 #include <stdio.h>
 #include "logger.h"
-
+#include "config.h"
 static uint8_t tx_data[2];
 
 static int8_t send_command(uint8_t cmd, uint16_t max_cmd_wait_ms, uint8_t *response)
@@ -47,21 +47,48 @@ int8_t arm_pyros(uint8_t *response)
 int8_t deploy_parachute(Parachute_t type, uint8_t *response)
 {
     int8_t status;
+    char log_msg[MAX_LOG_MESSAGE_LEN];
 
     switch(type) {
         case DROGUE:
             status = send_command(CMD_FIRE_DROGUE, 200, response);
+
+            if (status == 0 && !(response[1] & STATUS_DROGUE)) {
+                snprintf(log_msg, sizeof(log_msg), "Drogue failed to fire (status: 0x%02X)", response[1]);
+                tlog(ERR_PYRO_DROGUE_FAIL, log_msg);
+                status = -1;
+            }
             break;
+
         case MAIN:
-            // Longer timeout for main
-            status = send_command(CMD_FIRE_MAIN, 600, response);
+            status = send_command(CMD_FIRE_MAIN, 800, response);
+
+            if (status == 0) {
+                uint8_t bits = response[1];
+
+                if (!(bits & STATUS_MAIN)) {
+                    snprintf(log_msg, sizeof(log_msg), "Main pyro failed (status: 0x%02X)", bits);
+                    tlog(ERR_PYRO_MAIN_FAIL, log_msg);
+                    status = -1;
+                }
+                if (!(bits & STATUS_BACKUP)) {
+                    snprintf(log_msg, sizeof(log_msg), "Backup pyro failed (status: 0x%02X)", bits);
+                    tlog(ERR_PYRO_BACKUP_FAIL, log_msg);
+                    status = -1;
+                }
+            }
             break;
+
         default:
-            tlog(INFO_DEBUG, "Unknown parachute type");
+            snprintf(log_msg, sizeof(log_msg), "Unknown parachute type");
+            tlog(INFO_DEBUG, log_msg);
             response[0] = 0xEE;
             response[1] = 0xEE;
             status = -1;
             break;
     }
+
     return status;
 }
+
+

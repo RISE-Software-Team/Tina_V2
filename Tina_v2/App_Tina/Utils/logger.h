@@ -60,6 +60,8 @@ typedef enum {
 
 	ERR_PYRO_SEND_COMMAND_FAIL             = -16,  // I2C TX to Pyro board failed
 	ERR_PYRO_RECEIVE_COMMAND_FAIL          = -17,  // I2C RX from Pyro board failed
+
+	ERR_PYRO_BACKUP_FAIL                     = -18,  // Pyro channel bakcup firing fault
 } MessageCode_t;
 
 
