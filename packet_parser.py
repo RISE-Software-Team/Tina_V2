@@ -6,7 +6,7 @@ import binascii
 import os
 import csv
 
-PORT = "/dev/ttyUSB0"
+PORT = "COM21"
 BAUD = 115200
 PRINT_TELEMETRY_TO_CONSOLE = False
 
@@ -124,7 +124,7 @@ def parse_packet(buf: bytes):
             "acc_x": acc_x, "acc_y": acc_y, "acc_z": acc_z,
             "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z,
             "pressure": pressure,
-            "altitude": altitude,
+            "altitude": altitude / 100,
             "fsm_state": fsm_state,
             "fsm_state_str": FSM_STATE.get(fsm_state, f"UNKNOWN({fsm_state})"),
         })

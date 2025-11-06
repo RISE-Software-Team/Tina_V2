@@ -32,7 +32,7 @@ void telemetry_send(FlightFSM_t *fsm)
 
 	if (fsm->status.baro_ok) {
 		telemetry.pressure = (int32_t)(fsm->sensor_data.pres);
-		telemetry.altitude = (int16_t)fsm->hist.avg_alt;
+		telemetry.altitude = (int16_t)(fsm->hist.avg_alt * 100);
 	} else {
 		telemetry.pressure = -1;
 		telemetry.altitude = -1;
