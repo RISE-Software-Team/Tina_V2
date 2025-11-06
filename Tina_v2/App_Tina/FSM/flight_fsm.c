@@ -230,14 +230,14 @@ static bool apogee_detected(FlightFSM_t *fsm)
     if (!fsm)
         return false;
 
-    bool apogee_detected = false;
+    bool rising_pressure = false;
 
     if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa + DELTA_PRESSURE_FOR_APOGEE_DETECTION_PA)
-    	apogee_detected = true;
+    	rising_pressure  = true;
 
     static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;
 
-    if (apogee_detected) {
+    if (rising_pressure) {
     	apogee_countdown = max(apogee_countdown - 1, 0);
     } else {
     	apogee_countdown = APOGEE_COUNTDOWN_SIZE;
