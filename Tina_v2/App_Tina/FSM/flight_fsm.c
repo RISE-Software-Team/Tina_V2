@@ -38,8 +38,6 @@ static void handle_drogue_descent(FlightFSM_t *fsm);
 static void handle_main_descent(FlightFSM_t *fsm);
 static void handle_error(FlightFSM_t *fsm);
 
-static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;
-
 /*******************************************************************************
  ******************************* Public functions ******************************
  *******************************************************************************/
@@ -226,6 +224,7 @@ static bool apogee_detected(FlightFSM_t *fsm)
     if (fsm->status.baro_ok && fsm->hist.avg_pres > fsm->min_pres_pa + DELTA_PRESSURE_FOR_APOGEE_DETECTION_PA)
     	rising_pressure  = true;
 
+    static int8_t apogee_countdown = APOGEE_COUNTDOWN_SIZE;
 
     if (rising_pressure) {
     	apogee_countdown = max(apogee_countdown - 1, 0);
