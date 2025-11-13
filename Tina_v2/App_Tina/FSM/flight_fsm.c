@@ -187,10 +187,18 @@ static void update_data(FlightFSM_t *fsm)
     }
 
     if (fsm->status.imu_ok) {
-        fsm->hist.vert_acc[fsm->hist.vert_acc_index] = fsm->sensor_data.acc_z;
-        fsm->hist.vert_acc_index = (fsm->hist.vert_acc_index + 1) % HISTORY_SIZE;
-        fsm->hist.avg_vert_acc = compute_average_value_from_history(fsm->hist.vert_acc);
+        if (fsm->hist.avg_vert_acc == 0 && fsm->hist.vert_acc_index == 0) {
+            fsm->hist.avg_vert_acc = fsm->sensor_data.acc_z;
+
+            for (uint8_t i = 0; i < HISTORY_SIZE; i++)
+                fsm->hist.vert_acc[i] = fsm->sensor_data.acc_z;
+        } else {
+            fsm->hist.vert_acc[fsm->hist.vert_acc_index] = fsm->sensor_data.acc_z;
+            fsm->hist.vert_acc_index = (fsm->hist.vert_acc_index + 1) % HISTORY_SIZE;
+            fsm->hist.avg_vert_acc = compute_average_value_from_history(fsm->hist.vert_acc);
+        }
     }
+
 }
 
 static bool launch_detected(FlightFSM_t *fsm)
