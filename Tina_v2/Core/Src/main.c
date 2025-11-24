@@ -160,7 +160,7 @@ int main(void)
   tlog(INFO_DEBUG,"Starting Pyro Test");
 
 
-   HAL_Delay(1000);
+   HAL_Delay(15000);
    tlog(INFO_DEBUG, "Firing DROGUE...");
 
    deploy_parachute(DROGUE, pyro_response);
