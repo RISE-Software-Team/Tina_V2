@@ -70,7 +70,7 @@ int8_t deploy_parachute(Parachute_t type, uint8_t *response)
                     status = -1;
                 }
                 if (!(bits & STATUS_CHAMBER)) {
-                    snprintf(log_msg, sizeof(log_msg), "Chamber pyro failed (status: 0x%02X)", bits);
+                    snprintf(log_msg, sizeof(log_msg), "Cutter pyro failed (status: 0x%02X)", bits);
                     tlog(ERR_PYRO_MAIN_FAIL, log_msg);
                     status = -1;
                 }
