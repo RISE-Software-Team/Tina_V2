@@ -113,6 +113,7 @@ int main(void)
   HAL_Delay(1000);
 
   bool sanity_check_passed = true;
+  bool pyro_err = true;
 
   if (BME280_Init()) {
     sanity_check_passed = false;
@@ -133,8 +134,14 @@ int main(void)
   HAL_Delay(1000);
 
   uint8_t pyro_response[2];
-  uint8_t pyro_err = arm_pyros(pyro_response) == -1 || pyro_response[0] != TX_ACK;
 
+
+  uint8_t retries = 3;
+  while (retries--) {
+      pyro_err = arm_pyros(pyro_response) == -1 || pyro_response[0] != TX_ACK;
+      if (!pyro_err) break;
+      HAL_Delay(1000);
+  }
 
   if (pyro_err) {
     sanity_check_passed = false;
@@ -143,9 +150,8 @@ int main(void)
     tlog(INFO_PYRO_ARM_PASS, NULL);
   }
 
-  char msg[64];
-  snprintf(msg, sizeof(msg),"PYRO ARM response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
-
+  // char msg[64];
+  // snprintf(msg, sizeof(msg),"PYRO ARM response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
   FlightFSM_t fsm;
   flight_fsm_init(&fsm, pyro_err == 0);
 
@@ -154,34 +160,6 @@ int main(void)
   } else {
     tlog(ERR_COMPONENT_SANITY_CHECK_FAIL, NULL);
   }
-
-  // tlog(INFO_DEBUG,"Starting Pyro Test");
-
-
-  //  HAL_Delay(1000);
-  //  tlog(INFO_DEBUG, "Firing DROGUE...");
-  //  deploy_parachute(DROGUE, pyro_response);
-  //  HAL_Delay(200);
-
-  //  char drogue_msg[64];
-
-  //  snprintf(drogue_msg, sizeof(drogue_msg),"DROGUE deploy response: 0x%02X 0x%02X", pyro_response[0], pyro_response[1]);
-
-  //  tlog(INFO_DEBUG, drogue_msg);
-
-  //  HAL_Delay(5000);
-
-  //  tlog(INFO_DEBUG, "Firing MAIN...");
-  //  deploy_parachute(MAIN, pyro_response);
-  //  HAL_Delay(200);
-
-  //  char main_msg[64];
-  //  snprintf(main_msg, sizeof(main_msg),
-  //           "MAIN deploy response: 0x%02X 0x%02X",
-  //           pyro_response[0], pyro_response[1]);
-  //  tlog(INFO_DEBUG, main_msg);
-
-  //  tlog(INFO_DEBUG, "Pyro Test Complete.");
 
   /* USER CODE END 2 */
 

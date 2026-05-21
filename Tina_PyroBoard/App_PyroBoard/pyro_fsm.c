@@ -61,7 +61,8 @@ void pyro_handle_command(CommandPacket_t *packet, uint8_t *tx_buffer)
                 pyro_fire_channel(PYRO_MAIN);
                 HAL_Delay(FIRE_DELAY_MS);
 
-                uint8_t expected_bits = STATUS_MAIN | STATUS_BACKUP;
+                // returns ack if all three have successfully fired
+                uint8_t expected_bits = STATUS_DROGUE | STATUS_CHAMBER | STATUS_MAIN;
                 tx_buffer[0] = ((pyro_status_bits & expected_bits) == expected_bits) ? TX_ACK : TX_NACK;
             }
             break;
