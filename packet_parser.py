@@ -6,7 +6,7 @@ import binascii
 import os
 import csv
 
-PORT = "COM21"  # Update as needed
+PORT = "/dev/ttyUSB0"  # Update as needed
 BAUD = 115200
 PRINT_TELEMETRY_TO_CONSOLE = True
 

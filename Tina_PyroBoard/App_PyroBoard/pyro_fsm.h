@@ -30,11 +30,11 @@ typedef struct{
 } CommandPacket_t;
 
 //I pyro 2 - droge, pyro 3 -main, pyro 4 backup
-#define ENABLE_PYRO_DROGUE_PIN    En_Pyro_2_Pin
-#define ENABLE_PYRO_DROGUE_PORT   En_Pyro_2_GPIO_Port
+#define ENABLE_PYRO_DROGUE_PIN    En_Pyro_1_Pin
+#define ENABLE_PYRO_DROGUE_PORT   En_Pyro_1_GPIO_Port
 
-//#define ENABLE_PYRO_CHAMBER_PIN   En_Pyro_2_Pin
-//#define ENABLE_PYRO_CHAMBER_PORT  En_Pyro_2_GPIO_Port
+#define ENABLE_PYRO_CHAMBER_PIN   En_Pyro_2_Pin
+#define ENABLE_PYRO_CHAMBER_PORT  En_Pyro_2_GPIO_Port
 
 #define ENABLE_PYRO_MAIN_PIN      En_Pyro_3_Pin
 #define ENABLE_PYRO_MAIN_PORT     En_Pyro_3_GPIO_Port
@@ -42,11 +42,12 @@ typedef struct{
 #define ENABLE_PYRO_BACKUP_PIN    En_Pyro_4_Pin
 #define ENABLE_PYRO_BACKUP_PORT   En_Pyro_4_GPIO_Port
 
-#define READ_PYRO_DROGUE_PIN      Pyro_Read_2_Pin
-#define READ_PYRO_DROGUE_PORT     Pyro_Read_2_GPIO_Port
+// READ PINS - READS HIGH When pyros not yet fired
+#define READ_PYRO_DROGUE_PIN      Pyro_Read_1_Pin
+#define READ_PYRO_DROGUE_PORT     Pyro_Read_1_GPIO_Port
 //
-//#define READ_PYRO_CHAMBER_PIN     Pyro_Read_2_Pin
-//#define READ_PYRO_CHAMBER_PORT    Pyro_Read_2_GPIO_Port
+#define READ_PYRO_CHAMBER_PIN     Pyro_Read_2_Pin
+#define READ_PYRO_CHAMBER_PORT    Pyro_Read_2_GPIO_Port
 
 #define READ_PYRO_MAIN_PIN        Pyro_Read_3_Pin
 #define READ_PYRO_MAIN_PORT       Pyro_Read_3_GPIO_Port
@@ -62,7 +63,6 @@ typedef struct{
 #define CMD_ARM         0x01
 #define CMD_FIRE_DROGUE 0x02
 #define CMD_FIRE_MAIN   0x03
-#define CMD_STATUS      0x04
 
 #define TX_ACK 0xAA
 #define TX_NACK 0xFF
