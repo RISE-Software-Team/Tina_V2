@@ -60,20 +60,23 @@ int8_t deploy_parachute(Parachute_t type, uint8_t *response)
             }
             break;
 
-        case MAIN:
+            case MAIN:
             status = send_command(CMD_FIRE_MAIN, 800, response);
-
             if (status == 0) {
                 uint8_t bits = response[1];
-
-                if (!(bits & STATUS_MAIN)) {
-                    snprintf(log_msg, sizeof(log_msg), "Main pyro failed (status: 0x%02X)", bits);
+                if (!(bits & STATUS_DROGUE)) {
+                    snprintf(log_msg, sizeof(log_msg), "Drogue was not fired before main (status: 0x%02X)", bits);
+                    tlog(ERR_PYRO_DROGUE_FAIL, log_msg);
+                    status = -1;
+                }
+                if (!(bits & STATUS_CHAMBER)) {
+                    snprintf(log_msg, sizeof(log_msg), "Chamber pyro failed (status: 0x%02X)", bits);
                     tlog(ERR_PYRO_MAIN_FAIL, log_msg);
                     status = -1;
                 }
-                if (!(bits & STATUS_BACKUP)) {
-                    snprintf(log_msg, sizeof(log_msg), "Backup pyro failed (status: 0x%02X)", bits);
-                    tlog(ERR_PYRO_BACKUP_FAIL, log_msg);
+                if (!(bits & STATUS_MAIN)) {
+                    snprintf(log_msg, sizeof(log_msg), "Main pyro failed (status: 0x%02X)", bits);
+                    tlog(ERR_PYRO_MAIN_FAIL, log_msg);
                     status = -1;
                 }
             }
